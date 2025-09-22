@@ -1,0 +1,1 @@
+MySQL_Config = 'mysql+pymysql://mysql:THDJeyNMW7PNAj3F@127.0.0.1:3306/chatanon'
