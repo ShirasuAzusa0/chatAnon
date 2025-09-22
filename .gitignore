@@ -1,0 +1,33 @@
+# General
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Frontend
+# dependencies
+node_modules/
+
+# Backend
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+/backend/env/
+/backend/venv/
+/backend/ENV/
+/backend/env.bak/
+/backend/venv.bak/
+/backend/instance/
+
+# Flask
+/backend/instance/
+/backend/.webassets-cache
+/backend/htmlcov/
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
