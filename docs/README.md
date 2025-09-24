@@ -9,7 +9,7 @@ ChatAnon 项目的文档。
 
 ## 技术栈
 
-- `前端`：React
+- `前端`：TypeScript、React、Tailwind CSS、shadcn/ui、Zustand、React Router
 - `后端`：python3.12、Flask、Flask-RESTful、SQLAlchemy、RSA、JWT、
 - `数据库`：MySQL
 
