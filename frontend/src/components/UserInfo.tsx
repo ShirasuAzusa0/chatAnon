@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { LogIn, LogOut } from 'lucide-react';
-import { Link } from 'react-router';
 import { useUserStore } from '@/stores/userStore';
 import {
   AlertDialog,
@@ -15,10 +14,12 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
+import LoginDialog from './LoginDialog';
 
 export function UserInfo() {
   const { user, isLoggedIn, logout } = useUserStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -28,12 +29,16 @@ export function UserInfo() {
   if (!isLoggedIn || !user) {
     return (
       <div className="flex items-center justify-between w-full">
-        <Button asChild variant="ghost" size="sm" className="w-full justify-start gap-2">
-          <Link to="/login">
-            <LogIn className="h-4 w-4" />
-            <span className="group-data-[state=collapsed]:hidden">登录</span>
-          </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2"
+          onClick={() => setIsLoginDialogOpen(true)}
+        >
+          <LogIn className="h-4 w-4" />
+          <span className="group-data-[state=collapsed]:hidden">登录</span>
         </Button>
+        <LoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
       </div>
     );
   }
