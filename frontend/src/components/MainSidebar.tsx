@@ -11,9 +11,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Link } from 'react-router';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { UserInfo } from '@/components/UserInfo.tsx';
 
 // Menu items.
 const items = [
@@ -56,14 +58,18 @@ export function MainSidebar() {
     <Sidebar variant="inset" collapsible="icon">
       {/* 侧边栏顶部 */}
       <SidebarHeader>
-        <Link to="/">
-          <div className="flex items-center gap-4">
-            <div className="rounded-md w-8 h-8 overflow-hidden">
-              <img className="h-full object-cover" src="/icon.png" alt="icon" />
+        <div className="flex items-center justify-between">
+          <Link to="/">
+            <div className="flex items-center gap-4">
+              <div className="rounded-md w-8 h-8 overflow-hidden">
+                <img className="h-full object-cover" src="/icon.png" alt="icon" />
+              </div>
+              <span className="text-xl group-data-[state=collapsed]:hidden">Anon Chat</span>
             </div>
-            <span className="text-xl group-data-[state=collapsed]:hidden">Anon Chat</span>
-          </div>
-        </Link>
+          </Link>
+          <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
+        </div>
+        <SidebarTrigger className="group-data-[state=expanded]:hidden" />
       </SidebarHeader>
       {/* 侧边栏主要部分 */}
       <SidebarContent>
@@ -113,7 +119,9 @@ export function MainSidebar() {
       {/* 侧边栏底部 */}
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>111</SidebarMenuItem>
+          <SidebarMenuItem>
+            <UserInfo />
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
