@@ -11,6 +11,7 @@
 - **组件库**: shadcn/ui
 - **状态管理**: Zustand
 - **路由**: Data 式 React Router
+- **包管理器**: pnpm
 
 ## 架构原则
 

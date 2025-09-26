@@ -16,6 +16,7 @@ alwaysApply: true
 - **Component Library**: shadcn/ui  
 - **State Management**: Zustand  
 - **Routing**: Data-style React Router  
+- **Package Manager**: pnpm
 
 ## Architectural Principles
 
