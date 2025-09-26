@@ -198,7 +198,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
           />
           {errors.loginPassword && <p className="text-sm text-danger">{errors.loginPassword}</p>}
         </div>
-        <div className="flex justify-between items-center mt-2">
+        <div className="flex justify-between items-center mt-8">
           <Button className="pl-0" variant="link">
             忘记密码
           </Button>
@@ -249,8 +249,8 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             <p className="text-sm text-danger">{errors.registerConfirm}</p>
           )}
         </div>
-        <div className="flex justify-end mt-2">
-          <Button className="px-8" onClick={handleRegisterSubmit} disabled={isSubmitting}>
+        <div className="flex mt-8">
+          <Button className="w-full" onClick={handleRegisterSubmit} disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="animate-spin" />}
             {isSubmitting ? '注册中...' : '注册'}
           </Button>

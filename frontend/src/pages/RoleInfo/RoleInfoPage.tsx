@@ -51,7 +51,7 @@ function RoleInfoPage() {
         const data = await fetchRoleData(roleId);
         setRoleData(data);
         setLoading(false);
-      } catch (err) {
+      } catch {
         setError('加载角色信息失败');
         setLoading(false);
       }

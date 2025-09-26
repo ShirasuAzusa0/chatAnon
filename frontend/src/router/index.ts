@@ -6,6 +6,7 @@ import FavoriteRolePage from '@/pages/FavoriteRole/FavoriteRolePage';
 import ForumPage from '@/pages/Forum/ForumPage';
 import App from '@/App';
 import MyRolePage from '@/pages/MyRole/MyRolePage';
+import SearchResultPage from '@/pages/SearchResult/SearchResultPage';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: '/my-role',
         Component: MyRolePage,
+      },
+      {
+        path: '/search/:searchParam',
+        Component: SearchResultPage,
       },
     ],
   },
