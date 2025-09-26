@@ -9,9 +9,11 @@ class TagsResource(Resource):
     def get(self):
         tag_list = CategoriesService().get_all_tags()
         if tag_list is None:
-            return {'message': 'The tags list is empty'}
+            return {'status': 'success', 'msg': 'The post tags list is empty'}
         else:
             return {
+                'status': 'success',
+                'msg': '所有帖子标签获取成功',
                 'data': [tag_model.serialize_mode2() for tag_model in tag_list]
             }
 

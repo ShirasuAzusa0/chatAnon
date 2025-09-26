@@ -132,8 +132,8 @@ class RolesService:
 
     # 获取最新角色列表
     def get_newest_roles(self):
-        query = Select(RolesModel).order_by(asc(RolesModel.createdAt))
-        return query
+        query = Select(RolesModel).order_by(asc(RolesModel.createdAt)).limit(3)
+        return db.session.scalars(query).all()
 
     # 获取推荐角色列表
     def get_recommend_roles(self):

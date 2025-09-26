@@ -26,15 +26,18 @@ class PostsModel(db.Model):
     categories = relationship("CategoriesModel", secondary=post_category, back_populates="posts")
 
     # 定义 like 成员变量与 userModel 映射类（多对多）
-    userPostLiked = relationship("UserModel", secondary=post_like, back_populates="postLiked")
+    userPostLiked = relationship("UsersModel", secondary=post_like, back_populates="postLiked")
 
     # 定义 favorite 成员变量与 userModel 映射类（多对多）
-    userPostFavorite = relationship("UserModel", secondary=post_favorites, back_populates="postFavorite")
+    userPostFavorite = relationship("UsersModel", secondary=post_favorites, back_populates="postFavorite")
+
+    # 定义 comments 成员变量与 CommentsModel 映射类的关系
+    comments = relationship("CommentsModel", back_populates="posts")
 
     # 序列化方法，需要序列化为json数据后再传输给前端
     def serialize_mode1(self):
         return {
-            'postId': str(self.postId),
+            'postId': self.postId,
             'title': str(self.title),
             'author': self.author.serialize_mode1() if self.author else None,
             'tags': [category.serialize_mode1() for category in self.categories],
@@ -47,7 +50,7 @@ class PostsModel(db.Model):
     # 序列化方法，需要序列化为json数据后在传输给前端
     def serialize_mode2(self):
         return {
-            'postId': str(self.postId),
+            'postId': self.postId,
             'title': str(self.title),
             'author': self.author.serialize_mode1() if self.author else None,
             'tags': [category.serialize_mode1() for category in self.categories],

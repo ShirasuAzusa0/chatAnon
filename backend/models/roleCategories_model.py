@@ -18,18 +18,17 @@ class RoleCategoriesModel(db.Model):
 
     def serialize_mode1(self):
         return {
-            'roleTagId': str(self.roleTagId),
+            'roleTagId': self.roleTagId,
             'roleTagName': str(self.roleTagName)
         }
 
     def serialize_mode2(self):
         return {
-            'roleTagId': str(self.roleTagId),
-            'roleTagName': str(self.roleTagName),
+            'tagId': self.roleTagId,
+            'tagName': str(self.roleTagName),
             'hueColor': str(self.hueColor),
-            'description': str(self.description),
-            'rolesCount': self.rolesCount,
-            'LastUpdateTime': self.LastUpdateTime.isoformat().replace('T',' ')
+            'Counts': self.rolesCount,
+            'lastUpdateTime': self.LastUpdateTime.isoformat().replace('T',' ')
         }
 
     def serialize_mode3(self):

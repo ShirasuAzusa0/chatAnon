@@ -20,13 +20,13 @@ class CategoriesModel(db.Model):
     # 序列化方法，需要序列化为json数据后再传输给前端
     def serialize_mode1(self):
         return {
-            'tagId': str(self.tagId),
+            'tagId': self.tagId,
             'tagName': str(self.tagName)
         }
 
     def serialize_mode2(self):
         return {
-            'tagId': str(self.tagId),
+            'tagId': self.tagId,
             'title': str(self.tagName),
             'hueColor': str(self.hueColor),
             'description': str(self.description),
