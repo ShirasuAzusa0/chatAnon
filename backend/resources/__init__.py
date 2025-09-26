@@ -11,4 +11,10 @@ api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = MYSQL_CONFIG
 db = SQLAlchemy(app)
 
-# from resources import ()
+from resources import (
+role_resource,
+role_category_resource,
+post_resource,
+post_category_resource,
+user_resource
+)
