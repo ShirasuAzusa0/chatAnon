@@ -32,13 +32,16 @@ class UsersModel(db.Model):
     postLiked = relationship("PostsModel", secondary=post_like, back_populates="userPostLiked")
 
     # 定义 commentsLiked 成员变量与 CommentsModel 映射类的关系（多对多）
-    commentLiked = relationship("CommentModel", secondary=comment_like, back_populates="userCommentLiked")
+    commentLiked = relationship("CommentsModel", secondary=comment_like, back_populates="userCommentLiked")
 
     # 定义 postsFavorite 成员变量与 PostsModel 映射类关系（多对多）
     postFavorite = relationship("PostsModel", secondary=post_favorites, back_populates="userPostFavorite")
 
+    # users 与 roles 反向关系
+    roles = relationship("RolesModel", foreign_keys="RolesModel.authorId", back_populates="author")
+
     # users 与 posts 反向关系
-    posts = relationship("PostModel", foreign_keys="PostsModel.authorId", back_populates="author")
+    posts = relationship("PostsModel", foreign_keys="PostsModel.authorId", back_populates="author")
 
     # users 与 comments 反向关系
     comments = relationship("CommentsModel", back_populates="author")
@@ -46,7 +49,7 @@ class UsersModel(db.Model):
     # 序列化方法，需要序列化为json数据后再传输给前端
     def serialize_mode1(self):
         return {
-            'userId': str(self.userId),
+            'userId': self.userId,
             'attributes': {
                 'avatarUrl': str(self.avatarUrl),
                 'userName': str(self.userName),

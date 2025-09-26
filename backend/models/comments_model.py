@@ -24,7 +24,7 @@ class CommentsModel(db.Model):
 
     def serialize(self):
         return {
-            'commentId': str(self.commentId),
+            'commentId': self.commentId,
             'author': self.author.serialize_mode1() if self.author else None,
             'content': str(self.content),
             'createdAt': self.createdAt.isoformat().replace('T',' '),
