@@ -33,6 +33,5 @@ class RoleCategoriesModel(db.Model):
 
     def serialize_mode3(self):
         return {
-            'roleTagName': str(self.roleTagName),
             'roles': [role.serialize_mode1() for role in self.roles]
         }

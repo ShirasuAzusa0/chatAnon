@@ -13,6 +13,6 @@ class RoleCategoriesService:
     def get_tag_by_id(self, roleTagId:INT):
         return db.session(RoleCategoriesModel, roleTagId)
 
-    # 获取只当标签对应的角色列表
-    def get_role_list_by_tagName(self, tagName:VARCHAR):
-        return RoleCategoriesModel.query.filter_by(tagName=tagName).first()
+    # 获取标签对应的角色列表
+    def get_role_list_by_tagName(self, roleTagName:VARCHAR):
+        return RoleCategoriesModel.query.filter_by(roleTagName=roleTagName).all()

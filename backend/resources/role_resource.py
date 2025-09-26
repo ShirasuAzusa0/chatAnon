@@ -1,5 +1,6 @@
 from flask import request
 from flask_restful import Resource
+from sqlalchemy import VARCHAR
 
 from resources import api
 
@@ -63,6 +64,22 @@ class NewestRoleResource(Resource):
                 'status': 'success',
                 'msg': '最新角色列表获取成功',
                 'data': [role.serialize_mode1() for role in newest_roles]
+            }
+
+class SearchRoleResource(Resource):
+    # 搜索获取角色概览信息
+    def get(self, search:VARCHAR):
+        search_list = RolesService().get_roles_by_search(search)
+        if search_list:
+            return {
+                'status': 'success',
+                'msg': '已找到所搜索的角色！',
+                'data': [role.serialize_mode1() for role in search_list]
+            }, 200
+        else:
+            return {
+                'status': 'fail',
+                'msg': '搜索的角色不存在！'
             }
 
 class PostRoleResource(Resource):
@@ -214,3 +231,4 @@ api.add_resource(RoleLikesResource, '/api/role-list/role/<int:roleId>/likes')
 api.add_resource(FavoriteRoleResource, '/api/role-list/role/<int:roleId>/favorite')
 api.add_resource(UserFavoriteRoleListResource, '/api/role-list/favorite')
 api.add_resource(UserReleasedRoleListResource, '/api/role-list/released')
+api.add_resource(SearchRoleResource, '/api/role-list/search/<string:search>')

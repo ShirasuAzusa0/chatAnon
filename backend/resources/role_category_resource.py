@@ -25,7 +25,7 @@ class TagRoleListResource(Resource):
             return {
                 "status": "success",
                 "msg": "获取指定标签对应的角色列表成功",
-                "data": tag_roleList.serialize_mode3()
+                "data": [role.serialize_mode1() for role in tag_roleList]
             }
         else:
             return {
@@ -34,4 +34,4 @@ class TagRoleListResource(Resource):
             }
 
 api.add_resource(RoleTagsResource, '/api/role-list/tags')
-api.add_resource(TagRoleListResource, '/api/role-list/search')
+api.add_resource(TagRoleListResource, '/api/role-list/<string:tag>')

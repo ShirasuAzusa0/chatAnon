@@ -1,4 +1,4 @@
-from sqlalchemy import Select, select, asc, desc, func, exists
+from sqlalchemy import Select, select, asc, desc, func, exists, VARCHAR
 
 from models.roles_model import RolesModel
 from models.role_category_model import role_category
@@ -134,6 +134,10 @@ class RolesService:
     def get_newest_roles(self):
         query = Select(RolesModel).order_by(asc(RolesModel.createdAt)).limit(3)
         return db.session.scalars(query).all()
+
+    # 通过搜索角色名获取角色列表
+    def get_roles_by_search(self, roleName:VARCHAR):
+        return RolesModel.query.filter_by(roleName=roleName).all()
 
     # 获取推荐角色列表
     def get_recommend_roles(self):
