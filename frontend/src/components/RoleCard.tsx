@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Heart, Bookmark } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
-import { Card, CardFooter, CardTitle } from '../../../components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardFooter, CardTitle } from '@/components/ui/card';
 
 interface RoleCardProps {
   id: number;

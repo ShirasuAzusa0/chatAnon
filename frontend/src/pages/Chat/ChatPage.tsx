@@ -33,7 +33,7 @@ function ChatPage() {
       userId: fallbackId,
       name: `用户 ${fallbackId}`,
       bio: '这个人很神秘，什么也没有留下。',
-      avatar: '/public/icon.png',
+      avatar: '/icon.png',
     };
   }, [chatId]);
 

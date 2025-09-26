@@ -1,12 +1,43 @@
-import SearchBar from './components/SearchBar';
-import RoleCard from './components/RoleCard';
-import { popularRoles, recommendedRoles } from './data/role-list';
+import { useEffect, useState } from 'react';
+import SearchBar from '@/components/SearchBar';
+import RoleCard from '@/components/RoleCard';
+import { fetchNewestRoleList, fetchRecommendedRoleList, type RoleData } from '@/api/roles';
 
 function HomePage() {
+  const [recommendedRoles, setRecommendedRoles] = useState<RoleData[]>([]);
+  const [newestRoles, setPopularRoles] = useState<RoleData[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const recomendedRes = await fetchRecommendedRoleList();
+      if (recomendedRes) setRecommendedRoles(recomendedRes);
+      const newestRes = await fetchNewestRoleList();
+      if (newestRes) setPopularRoles(newestRes);
+    };
+    fetchData();
+  }, []);
   return (
-    <main className="mx-auto px-4 py-8 space-y-10">
+    <section className="mx-auto p-4 space-y-10">
       {/* 搜索框部分 */}
       <SearchBar />
+
+      {/* 最新角色列表 */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold">最新角色</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {newestRoles.map((role) => (
+            <RoleCard
+              key={role.roleId}
+              id={role.roleId}
+              name={role.roleName}
+              description={role.short_info}
+              image={role.avatarURL}
+              collections={role.favoriteCount}
+              likes={role.likesCount}
+            />
+          ))}
+        </div>
+      </section>
 
       {/* 角色推荐列表 */}
       <section className="space-y-4">
@@ -14,32 +45,18 @@ function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {recommendedRoles.map((role) => (
             <RoleCard
-              key={role.id}
-              id={role.id}
-              name={role.name}
-              description={role.description}
-              image={role.image}
+              key={role.roleId}
+              id={role.roleId}
+              name={role.roleName}
+              description={role.short_info}
+              image={role.avatarURL}
+              collections={role.favoriteCount}
+              likes={role.likesCount}
             />
           ))}
         </div>
       </section>
-
-      {/* 热门角色列表 */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">热门角色</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {popularRoles.map((role) => (
-            <RoleCard
-              key={role.id}
-              id={role.id}
-              name={role.name}
-              description={role.description}
-              image={role.image}
-            />
-          ))}
-        </div>
-      </section>
-    </main>
+    </section>
   );
 }
 
