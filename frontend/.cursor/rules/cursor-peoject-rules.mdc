@@ -1,0 +1,115 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Project Rules
+
+## Tech Stack
+
+### Frontend Technologies
+
+- **Language**: TypeScript  
+- **Build Tool**: Vite  
+- **Framework**: React v19  
+- **Styling**: Tailwind CSS 4.1  
+- **Component Library**: shadcn/ui  
+- **State Management**: Zustand  
+- **Routing**: Data-style React Router  
+
+## Architectural Principles
+
+### 1. MVVM Layered Architecture
+
+- Strictly implement MVVM (Model-View-ViewModel) layered architecture  
+- Ensure clear responsibilities and well-defined boundaries for each layer  
+
+### 2. React Best Practices
+
+- Use functional components and Hooks  
+- Avoid unnecessary re-renders  
+- Use React.memo, useCallback, and useMemo appropriately  
+- Follow the principle of unidirectional data flow  
+
+### 3. Component Design Guidelines
+
+- **Keep components lightweight**: each component should focus on a single responsibility  
+- **Avoid oversized components**: split into smaller components when needed  
+- Components should be reusable and testable  
+- Prefer composition over inheritance to extend component functionality  
+
+### 4. Code Layering Rules
+
+- **Model Layer**: defines data structures and handles data operations  
+- **ViewModel Layer**: processes business logic, connects Model and View  
+- **View Layer**: responsible for UI rendering, contains no business logic  
+- **Strictly prohibited**:  
+  - Directly manipulating Model in the View layer  
+  - Mixing business logic into the View layer  
+  - Blending logic across layers  
+
+### 5. Type Safety Requirements
+
+- **No use of `any` type**: all variables, parameters, and return values must have explicit type definitions  
+- **Ensure completeness and accuracy of type definitions**: use interfaces and type aliases for complex data structures  
+- Fully leverage TypeScript’s type inference and type guards  
+- Validate and transform external data types  
+
+## Project Structure
+```
+src/
+├── assets/ # Static assets
+├── components/ # Shared UI components
+├── hooks/ # Custom Hooks
+├── lib/ # Utilities and constants
+├── models/ # Data model definitions
+├── pages/ # Page components
+├── router/ # Routing configuration
+├── api/ # API services
+├── stores/ # Zustand state management
+└── viewModels/ # ViewModel layer
+```
+
+## Code Standards
+
+### Naming Conventions
+
+- **File names**: kebab-case (e.g., user-config.ts)  
+- **React component file names**: PascalCase (e.g., UserProfile.tsx)  
+- **Stores file names**: 使用 camelCase (如: userStore.ts)
+- **Component names**: PascalCase (e.g., UserProfile)  
+- **Function/variable names**: camelCase (e.g., getUserData)  
+- **Constant names**: UPPER_SNAKE_CASE (e.g., API_BASE_URL)  
+- **Type/interface names**: PascalCase (e.g., UserData)  
+
+### Import Order
+
+1. External libraries  
+2. Internal modules  
+3. Styles  
+
+### Comment Guidelines
+
+- Add comments for complex logic  
+- Use JSDoc style for function documentation  
+- Avoid meaningless comments  
+
+## Performance Optimization Guidelines
+
+- Use React.memo, useCallback, and useMemo appropriately  
+- Avoid unnecessary re-renders  
+- Implement code splitting and lazy loading  
+- Optimize large list rendering (virtualized lists)  
+- Apply caching strategies appropriately  
+
+## Testing Requirements
+
+- Write unit tests for core business logic  
+- Component tests to ensure correct UI interactions  
+- Integration tests to verify functional workflows  
+
+## Version Control Standards
+
+- Follow Semantic Versioning  
+- Use Git Flow workflow  
+- Commit messages must follow the Conventional Commits specification  

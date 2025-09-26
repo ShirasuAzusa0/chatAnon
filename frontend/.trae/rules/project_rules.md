@@ -70,11 +70,13 @@ src/
 
 ### 命名规范
 
-- **文件命名**: 使用 kebab-case (如: user-profile.tsx)
+- **文件命名**: 使用 kebab-case (如: user-config.ts)
+- **React组件文件命名**: 使用 PascalCase (如: UserProfile.tsx)
+- **Stores文件命名**: 使用 camelCase (如: userStore.ts)
 - **组件命名**: 使用 PascalCase (如: UserProfile)
 - **函数/变量命名**: 使用 camelCase (如: getUserData)
 - **常量命名**: 使用 UPPER_SNAKE_CASE (如: API_BASE_URL)
-- **类型/接口命名**: 使用 PascalCase，接口以 I 开头 (如: IUserData)
+- **类型/接口命名**: 使用 PascalCase (如: UserData)
 
 ### 导入顺序
 
