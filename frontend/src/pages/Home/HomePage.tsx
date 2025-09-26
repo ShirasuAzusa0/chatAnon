@@ -1,6 +1,6 @@
 import SearchBar from './components/SearchBar';
 import RoleCard from './components/RoleCard';
-import { popularRoles, recommendedRoles } from './data/rolesList';
+import { popularRoles, recommendedRoles } from './data/role-list';
 
 function HomePage() {
   return (

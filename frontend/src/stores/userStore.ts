@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface IUser {
+interface User {
   userId: string;
   userName: string;
   email: string;
@@ -9,10 +9,10 @@ interface IUser {
 }
 
 interface UserState {
-  user: IUser | null;
+  user: User | null;
   token: string | null;
   isLoggedIn: boolean;
-  login: (user: IUser, token: string) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
 }
 
