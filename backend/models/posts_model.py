@@ -1,4 +1,5 @@
-from sqlalchemy import VARCHAR, DATETIME, INT, LONGTEXT, ForeignKey
+from sqlalchemy import VARCHAR, DATETIME, INT, ForeignKey
+from sqlalchemy.dialects.mysql import  LONGTEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.post_category_model import post_category
