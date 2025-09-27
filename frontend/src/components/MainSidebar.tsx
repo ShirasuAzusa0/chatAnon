@@ -1,4 +1,4 @@
-import { MessagesSquare, Home, Star, BookUser, ChevronDown } from 'lucide-react';
+import { Home, Star, BookUser, ChevronDown } from 'lucide-react';
 
 import {
   Sidebar,
@@ -24,11 +24,11 @@ const items = [
     url: '/',
     icon: Home,
   },
-  {
-    title: '论坛',
-    url: '/forum',
-    icon: MessagesSquare,
-  },
+  // {
+  //   title: '论坛',
+  //   url: '/forum',
+  //   icon: MessagesSquare,
+  // },
   {
     title: '收藏角色',
     url: '/favorite-role',
@@ -64,6 +64,9 @@ export function MainSidebar() {
               <div className="h-8 w-8 overflow-hidden rounded-md">
                 <img className="h-full object-cover" src="/icon.png" alt="icon" />
               </div>
+              <span className="absolute left-20 w-30 text-lg font-bold select-none group-data-[state=collapsed]:opacity-0">
+                Anon Chat
+              </span>
             </div>
           </Link>
           <SidebarTrigger className="group-data-[state=collapsed]:absolute group-data-[state=collapsed]:top-1/2 group-data-[state=collapsed]:right-2 group-data-[state=collapsed]:z-10 group-data-[state=collapsed]:-translate-y-1/2 group-data-[state=collapsed]:p-4.5 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:group-hover/header:opacity-100" />

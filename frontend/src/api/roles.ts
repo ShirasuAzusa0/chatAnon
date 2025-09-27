@@ -33,10 +33,6 @@ export interface RoleTag {
    */
   Counts: number;
   /**
-   * 标签颜色
-   */
-  hueColor: string;
-  /**
    * 最新更新时间
    */
   lastUpdateTime: string;
@@ -64,6 +60,12 @@ export const fetchRoleDetail = async () => {
   return await get<RoleData>('/api/role-list/tags');
 };
 
+// 获取搜索角色列表
 export const fetchSearchRoleList = async (searchParam: string) => {
   return await get<RoleData[]>(`/api/role-list/search/${searchParam}`);
+};
+
+// 获取标签下的角色列表
+export const fetchRoleListByTag = async (tagName: string) => {
+  return await get<RoleData[]>(`/api/role-list/${tagName}`);
 };
