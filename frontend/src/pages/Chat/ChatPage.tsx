@@ -98,7 +98,7 @@ function ChatPage() {
   };
 
   return (
-    <div className="flex h-[100dvh] md:h-[calc(100dvh-20px)]  flex-col">
+    <div className="flex h-[100dvh] flex-col md:h-[calc(100dvh-20px)]">
       {/* 顶部：聊天对象信息 */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
@@ -107,8 +107,8 @@ function ChatPage() {
             <AvatarFallback>{target.name.slice(0, 2)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <div className="text-sm font-medium truncate">{target.name}</div>
-            <div className="text-xs text-muted-foreground truncate">{target.bio}</div>
+            <div className="truncate text-sm font-medium">{target.name}</div>
+            <div className="text-muted-foreground truncate text-xs">{target.bio}</div>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={() => setShowDetail((v) => !v)}>
@@ -122,7 +122,7 @@ function ChatPage() {
         {/* 左侧：消息列表 + 输入 */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* 中部：消息列表 */}
-          <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
             {messages.map((message) => {
               const isMe = message.senderId === (currentUser?.userId ?? 'me');
               return (

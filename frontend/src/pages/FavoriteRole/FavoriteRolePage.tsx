@@ -1,7 +1,7 @@
 function FavoriteRolePage() {
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-svh">FavoriteRolePage</div>
+      <div className="flex min-h-svh flex-col items-center justify-center">FavoriteRolePage</div>
     </>
   );
 }

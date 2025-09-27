@@ -36,8 +36,8 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center pt-12 pb-10 mx-[-16px] mt-[-32px] relative overflow-hidden',
-        isSearching ? 'h-40 w-full mb-0' : 'h-150'
+        'relative mx-[-16px] mt-[-32px] flex flex-col items-center justify-center overflow-hidden pt-12 pb-10',
+        isSearching ? 'mb-0 h-40 w-full' : 'h-150'
       )}
       style={
         isSearching
@@ -54,12 +54,12 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
       {!isSearching && (
         <>
           {/* 白色透明层作为前景 */}
-          <div className="absolute inset-0 bg-linear-to-b from-white/90 to-white z-0"></div>
-          <h1 className="text-4xl font-bold mb-8 text-center relative z-10">寻找你的专属角色</h1>
+          <div className="absolute inset-0 z-0 bg-linear-to-b from-white/90 to-white"></div>
+          <h1 className="relative z-10 mb-8 text-center text-4xl font-bold">寻找你的专属角色</h1>
         </>
       )}
-      <div className="relative w-full max-w-3xl mx-auto z-10">
-        <div className="relative group">
+      <div className="relative z-10 mx-auto w-full max-w-3xl">
+        <div className="group relative">
           <Input
             type="text"
             value={serachParam}
@@ -67,19 +67,19 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
             placeholder="搜索你感兴趣的角色..."
             onKeyDown={handleKeyDown}
             className={cn(
-              'w-full h-16 text-lg pl-6 pr-24 rounded-full border-2 border-primary/10 shadow-lg focus-visible:ring-2 bg-white  placeholder:text-gray-400 duration-300 hover:shadow-xl'
+              'border-primary/10 h-16 w-full rounded-full border-2 bg-white pr-24 pl-6 text-lg shadow-lg duration-300 placeholder:text-gray-400 hover:shadow-xl focus-visible:ring-2'
             )}
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          <div className="absolute top-1/2 right-3 -translate-y-1/2">
             <Button
-              className="rounded-full w-10 h-10 bg-primary hover:bg-primary/90 transition-colors"
+              className="bg-primary hover:bg-primary/90 h-10 w-10 rounded-full transition-colors"
               onClick={handleSearch}
             >
               <Search />
             </Button>
           </div>
         </div>
-        <div className="absolute inset-0 rounded-full pointer-events-none bg-gradient-to-r from-primary/5 to-secondary/5"></div>
+        <div className="from-primary/5 to-secondary/5 pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r"></div>
       </div>
     </div>
   );

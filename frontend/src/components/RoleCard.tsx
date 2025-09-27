@@ -17,7 +17,7 @@ function RoleCard({ id, name, description, image, collections = 0, likes = 0 }: 
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 pt-0">
+    <Card className="overflow-hidden pt-0 transition-shadow duration-300 hover:shadow-lg">
       <div
         className="relative h-48 w-full cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
@@ -25,7 +25,7 @@ function RoleCard({ id, name, description, image, collections = 0, likes = 0 }: 
       >
         <img src={image} alt={name} className="h-full w-full object-cover" />
         {isHovered && (
-          <div className="absolute bottom-2 right-2">
+          <div className="absolute right-2 bottom-2">
             <Link to={`/role-info/${id}`}>
               <Button
                 size="sm"
@@ -39,20 +39,20 @@ function RoleCard({ id, name, description, image, collections = 0, likes = 0 }: 
         )}
       </div>
       <CardFooter className="flex flex-col items-start">
-        <div className="flex justify-between w-full">
+        <div className="flex w-full justify-between">
           <CardTitle className="text-lg">{name}</CardTitle>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center space-x-1 text-sm">
               <Bookmark className="h-4 w-4" />
               <span>{collections}</span>
             </div>
-            <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center space-x-1 text-sm">
               <Heart className="h-4 w-4" />
               <span>{likes}</span>
             </div>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-2">{description}</p>
+        <p className="text-muted-foreground mt-2 text-sm">{description}</p>
       </CardFooter>
     </Card>
   );
