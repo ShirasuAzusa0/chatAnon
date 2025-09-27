@@ -57,19 +57,17 @@ export function MainSidebar() {
   return (
     <Sidebar variant="inset" collapsible="icon">
       {/* 侧边栏顶部 */}
-      <SidebarHeader>
+      <SidebarHeader className="group/header relative">
         <div className="flex items-center justify-between">
-          <Link to="/">
+          <Link className="group-data-[state=collapsed]:group-hover/header:opacity-0" to="/">
             <div className="flex items-center gap-4">
-              <div className="rounded-md w-8 h-8 overflow-hidden">
+              <div className="h-8 w-8 overflow-hidden rounded-md">
                 <img className="h-full object-cover" src="/icon.png" alt="icon" />
               </div>
-              <span className="text-xl group-data-[state=collapsed]:hidden">Anon Chat</span>
             </div>
           </Link>
-          <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
+          <SidebarTrigger className="group-data-[state=collapsed]:absolute group-data-[state=collapsed]:top-1/2 group-data-[state=collapsed]:right-2 group-data-[state=collapsed]:z-10 group-data-[state=collapsed]:-translate-y-1/2 group-data-[state=collapsed]:p-4.5 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:group-hover/header:opacity-100" />
         </div>
-        <SidebarTrigger className="group-data-[state=expanded]:hidden" />
       </SidebarHeader>
       {/* 侧边栏主要部分 */}
       <SidebarContent>

@@ -23,9 +23,9 @@ function NewRoleCard() {
 
   return (
     <>
-      <Card className="flex flex-col items-center justify-center overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <Card className="flex flex-col items-center justify-center overflow-hidden transition-shadow duration-300 hover:shadow-lg">
         <div className="flex flex-col items-center justify-center gap-4 p-4">
-          <SmilePlus className="w-20 h-20 text-muted-foreground" />
+          <SmilePlus className="text-muted-foreground h-20 w-20" />
           <span>没有找到想要的角色？</span>
           <Button className="w-full" onClick={handleCreateNewRole}>
             新建一个

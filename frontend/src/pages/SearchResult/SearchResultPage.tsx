@@ -21,11 +21,11 @@ export default function SearchResultPage() {
   }, [searchParam]);
 
   return (
-    <section className="mx-auto p-4 space-y-10 relative">
-      <div className="sticky top-[-40px] lg:mx-[-16px] z-10 bg-linear-to-b from-white to-white/50 backdrop-blur-xl h-30">
+    <section className="relative mx-auto space-y-10 p-4">
+      <div className="sticky top-[-40px] z-10 h-30 bg-linear-to-b from-white to-white/50 backdrop-blur-xl lg:mx-[-16px]">
         <SearchBar isSearching param={searchParam} />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {roleList.map((role) => (
           <RoleCard
             key={role.roleId}

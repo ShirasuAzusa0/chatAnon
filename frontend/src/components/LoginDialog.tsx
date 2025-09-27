@@ -169,7 +169,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
 
   return (
     <Tabs defaultValue="login" onValueChange={handleTabChange}>
-      <TabsList className="grid w-full grid-cols-2 mb-2">
+      <TabsList className="mb-2 grid w-full grid-cols-2">
         <TabsTrigger value="login">登录</TabsTrigger>
         <TabsTrigger value="register">注册</TabsTrigger>
       </TabsList>
@@ -184,7 +184,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             onChange={handleLoginChange}
             className={cn(errors.loginEmail && 'border-danger')}
           />
-          {errors.loginEmail && <p className="text-sm text-danger">{errors.loginEmail}</p>}
+          {errors.loginEmail && <p className="text-danger text-sm">{errors.loginEmail}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="login-password">密码</Label>
@@ -196,9 +196,9 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             onChange={handleLoginChange}
             className={cn(errors.loginPassword && 'border-danger')}
           />
-          {errors.loginPassword && <p className="text-sm text-danger">{errors.loginPassword}</p>}
+          {errors.loginPassword && <p className="text-danger text-sm">{errors.loginPassword}</p>}
         </div>
-        <div className="flex justify-between items-center mt-8">
+        <div className="mt-8 flex items-center justify-between">
           <Button className="pl-0" variant="link">
             忘记密码
           </Button>
@@ -219,7 +219,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             onChange={handleRegisterChange}
             className={cn(errors.registerEmail && 'border-danger')}
           />
-          {errors.registerEmail && <p className="text-sm text-danger">{errors.registerEmail}</p>}
+          {errors.registerEmail && <p className="text-danger text-sm">{errors.registerEmail}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="register-password">密码</Label>
@@ -232,7 +232,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             className={cn(errors.registerPassword && 'border-danger')}
           />
           {errors.registerPassword && (
-            <p className="text-sm text-danger">{errors.registerPassword}</p>
+            <p className="text-danger text-sm">{errors.registerPassword}</p>
           )}
         </div>
         <div className="space-y-2">
@@ -246,10 +246,10 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             className={cn(errors.registerConfirm && 'border-danger')}
           />
           {errors.registerConfirm && (
-            <p className="text-sm text-danger">{errors.registerConfirm}</p>
+            <p className="text-danger text-sm">{errors.registerConfirm}</p>
           )}
         </div>
-        <div className="flex mt-8">
+        <div className="mt-8 flex">
           <Button className="w-full" onClick={handleRegisterSubmit} disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="animate-spin" />}
             {isSubmitting ? '注册中...' : '注册'}

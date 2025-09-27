@@ -28,7 +28,7 @@ export function UserInfo() {
 
   if (!isLoggedIn || !user) {
     return (
-      <div className="flex items-center justify-between w-full">
+      <div className="flex w-full items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
@@ -44,15 +44,15 @@ export function UserInfo() {
   }
 
   return (
-    <div className="flex items-center justify-between w-full">
+    <div className="flex w-full items-center justify-between">
       <div className="flex items-center gap-3">
         <Avatar className="h-8 w-8">
           <AvatarImage src={user.avatar} alt={user.userName} />
           <AvatarFallback>{user.userName.slice(0, 2)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col overflow-hidden group-data-[state=collapsed]:hidden">
-          <span className="text-sm font-medium truncate">{user.userName}</span>
-          <span className="text-xs text-muted-foreground truncate">{user.email}</span>
+          <span className="truncate text-sm font-medium">{user.userName}</span>
+          <span className="text-muted-foreground truncate text-xs">{user.email}</span>
         </div>
       </div>
 

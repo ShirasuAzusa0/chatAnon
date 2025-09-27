@@ -157,7 +157,7 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
               className={cn(errors.roleName && 'border-destructive')}
               disabled={isSubmitting}
             />
-            {errors.roleName && <p className="text-sm text-destructive">{errors.roleName}</p>}
+            {errors.roleName && <p className="text-destructive text-sm">{errors.roleName}</p>}
           </div>
 
           <div className="space-y-2">
@@ -169,7 +169,7 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
               placeholder="选择角色图片或直接拖拽到此处"
               disabled={isSubmitting}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               支持 JPG、PNG、GIF 格式，建议尺寸 200x200 像素，文件大小不超过 5MB
             </p>
           </div>
@@ -188,11 +188,11 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
               )}
               disabled={isSubmitting}
             />
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               {errors.characteristics && (
-                <p className="text-sm text-destructive">{errors.characteristics}</p>
+                <p className="text-destructive text-sm">{errors.characteristics}</p>
               )}
-              <p className="text-sm text-muted-foreground ml-auto">
+              <p className="text-muted-foreground ml-auto text-sm">
                 {formData.characteristics.length}/500
               </p>
             </div>

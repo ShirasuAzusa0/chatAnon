@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 export interface FileUploadProps {
@@ -124,11 +123,11 @@ export function FileUpload({
     <div className={cn('w-full', className)}>
       <div
         className={cn(
-          'relative border-2 border-dashed rounded-lg p-6 transition-colors',
+          'relative rounded-lg border-2 border-dashed p-6 transition-colors',
           dragActive && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25 hover:border-muted-foreground/50',
-          disabled && 'opacity-50 cursor-not-allowed',
+          disabled && 'cursor-not-allowed opacity-50',
           error && 'border-destructive'
         )}
         onDragEnter={handleDrag}
@@ -151,7 +150,7 @@ export function FileUpload({
               <img
                 src={previewUrl}
                 alt="预览"
-                className="w-32 h-32 object-cover rounded-lg border"
+                className="h-32 w-32 rounded-lg border object-cover"
               />
               <Button
                 type="button"
@@ -164,32 +163,32 @@ export function FileUpload({
                 <X className="h-3 w-3" />
               </Button>
             </div>
-            <div className="text-sm text-muted-foreground">{selectedFile?.name}</div>
+            <div className="text-muted-foreground text-sm">{selectedFile?.name}</div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-muted">
+            <div className="bg-muted flex h-16 w-16 items-center justify-center rounded-full">
               {accept.includes('image') ? (
-                <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                <ImageIcon className="text-muted-foreground h-8 w-8" />
               ) : (
-                <Upload className="w-8 h-8 text-muted-foreground" />
+                <Upload className="text-muted-foreground h-8 w-8" />
               )}
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <p className="text-sm font-medium">{placeholder}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 支持 {accept} 格式，最大 {maxSize}MB
               </p>
             </div>
             <Button type="button" variant="outline" onClick={openFileDialog} disabled={disabled}>
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="mr-2 h-4 w-4" />
               选择文件
             </Button>
           </div>
         )}
       </div>
 
-      {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+      {error && <p className="text-destructive mt-2 text-sm">{error}</p>}
     </div>
   );
 }

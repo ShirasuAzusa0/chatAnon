@@ -18,12 +18,12 @@ function RoleDetailPanelBase({ className, user }: RoleDetailPanelProps) {
   return (
     <aside
       className={cn(
-        'border-l flex h-full w-full max-w-[360px] flex-col overflow-y-auto bg-background',
+        'bg-background flex h-full w-full max-w-[360px] flex-col overflow-y-auto border-l',
         className
       )}
     >
       <div className="p-4">
-        <div className="aspect-[3/4] w-full overflow-hidden rounded-md bg-muted">
+        <div className="bg-muted aspect-[3/4] w-full overflow-hidden rounded-md">
           {/* 竖图 */}
           <img
             src={user.avatarLarge}
@@ -33,7 +33,7 @@ function RoleDetailPanelBase({ className, user }: RoleDetailPanelProps) {
           />
         </div>
         <div className="mt-4">
-          <div className="text-base font-semibold truncate">{user.name}</div>
+          <div className="truncate text-base font-semibold">{user.name}</div>
         </div>
 
         {user.tags?.length > 0 && (
@@ -41,7 +41,7 @@ function RoleDetailPanelBase({ className, user }: RoleDetailPanelProps) {
             {user.tags.map((t) => (
               <span
                 key={t}
-                className="border bg-accent text-accent-foreground inline-flex items-center rounded-full px-2 py-0.5 text-xs"
+                className="bg-accent text-accent-foreground inline-flex items-center rounded-full border px-2 py-0.5 text-xs"
               >
                 {t}
               </span>
@@ -49,7 +49,7 @@ function RoleDetailPanelBase({ className, user }: RoleDetailPanelProps) {
           </div>
         )}
 
-        <div className="mt-4 whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground">
+        <div className="text-muted-foreground mt-4 text-sm leading-6 break-words whitespace-pre-wrap">
           {user.bio}
         </div>
       </div>

@@ -17,14 +17,14 @@ function HomePage() {
     fetchData();
   }, []);
   return (
-    <section className="mx-auto p-4 space-y-10">
+    <section className="mx-auto space-y-10 p-4">
       {/* 搜索框部分 */}
       <SearchBar />
 
       {/* 最新角色列表 */}
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">最新角色</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {newestRoles.map((role) => (
             <RoleCard
               key={role.roleId}
@@ -42,7 +42,7 @@ function HomePage() {
       {/* 角色推荐列表 */}
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">推荐角色</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {recommendedRoles.map((role) => (
             <RoleCard
               key={role.roleId}

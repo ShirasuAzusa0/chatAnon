@@ -82,7 +82,7 @@ function RoleInfoPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-lg">加载中...</div>
       </div>
     );
@@ -90,43 +90,43 @@ function RoleInfoPage() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-500 text-lg">{error}</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-lg text-red-500">{error}</div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
         <Card className="overflow-hidden">
           <CardHeader className="pb-0">
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col gap-6 md:flex-row">
               {/* 角色头像 */}
-              <div className="flex-shrink-0 w-32 h-32 md:w-48 md:h-48 rounded-lg overflow-hidden border shadow-sm">
+              <div className="h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg border shadow-sm md:h-48 md:w-48">
                 {roleData?.avatarURL && (
                   <img
                     src={roleData.avatarURL}
                     alt={roleData.roleName}
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 )}
               </div>
 
               {/* 角色信息 */}
               <div className="flex-1">
-                <CardTitle className="text-2xl md:text-3xl font-bold mb-2">
+                <CardTitle className="mb-2 text-2xl font-bold md:text-3xl">
                   {roleData?.roleName}
                 </CardTitle>
 
-                <div className="flex items-center gap-4 mt-4">
+                <div className="mt-4 flex items-center gap-4">
                   <Button
                     variant={isLiked ? 'default' : 'outline'}
                     size="sm"
                     className="gap-2 transition-all"
                     onClick={handleLike}
                   >
-                    <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+                    <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
                     <span>{roleData?.likesCount || 0}</span>
                   </Button>
 
@@ -136,12 +136,12 @@ function RoleInfoPage() {
                     className="gap-2 transition-all"
                     onClick={handleFavorite}
                   >
-                    <Star className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                    <Star className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
                     <span>{roleData?.favoriteCount || 0}</span>
                   </Button>
 
                   <Button variant="outline" size="sm" className="gap-2">
-                    <Share2 className="w-4 h-4" />
+                    <Share2 className="h-4 w-4" />
                     <span>分享</span>
                   </Button>
                 </div>

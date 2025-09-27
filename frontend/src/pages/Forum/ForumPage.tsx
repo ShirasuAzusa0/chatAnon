@@ -1,7 +1,7 @@
 function ForumPage() {
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-svh">ForumPage</div>
+      <div className="flex min-h-svh flex-col items-center justify-center">ForumPage</div>
     </>
   );
 }
