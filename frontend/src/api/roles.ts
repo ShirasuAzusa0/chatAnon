@@ -1,4 +1,4 @@
-import { get } from '@/lib/apiClient';
+import { get, post } from '@/lib/apiClient';
 
 export interface RoleData {
   /**
@@ -68,4 +68,13 @@ export const fetchSearchRoleList = async (searchParam: string) => {
 // 获取标签下的角色列表
 export const fetchRoleListByTag = async (tagName: string) => {
   return await get<RoleData[]>(`/api/role-list/${tagName}`);
+};
+
+// 用户创建自定义角色
+export const createCustomRole = async (roleName: string, description: string, attachment: File) => {
+  const formData = new FormData();
+  formData.append('roleName', roleName);
+  formData.append('description', description);
+  formData.append('attachment', attachment);
+  return await post<RoleData>('api/role-list/new', formData);
 };

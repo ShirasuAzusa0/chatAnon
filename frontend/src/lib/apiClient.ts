@@ -44,8 +44,8 @@ apiClient.interceptors.request.use((config) => {
 // 响应拦截器：统一错误转换；默认直接返回 data
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // 若后端包了一层，可在此解包如：return (response.data as ApiResponse<unknown>).data
-    return response.data;
+    // 有data就直接返回data，否则返回整个响应
+    return response.data ? response.data : response;
   },
   (error: AxiosError) => {
     const transformed: ApiError = normalizeAxiosError(error);
