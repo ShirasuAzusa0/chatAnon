@@ -6,12 +6,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { login, register, fetchUserInfo } from '@/api/user';
+import { encrypt } from '@/lib/encrypt';
+import { useUserStore } from '@/stores/userStore';
+import { toast } from 'sonner';
 
 interface TabsDemoProps {
   onTabChange?: (tab: string) => void;
 }
 
 function TabsDemo({ onTabChange }: TabsDemoProps) {
+  // 使用userStore
+  const { login: loginUser } = useUserStore();
+
   // 登录表单状态
   const [loginForm, setLoginForm] = useState({
     email: '',
@@ -21,6 +28,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
   // 注册表单状态
   const [registerForm, setRegisterForm] = useState({
     email: '',
+    userName: '', // 添加用户名字段
     password: '',
     confirmPassword: '',
   });
@@ -30,12 +38,15 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
     loginEmail: '',
     loginPassword: '',
     registerEmail: '',
+    registerUserName: '',
     registerPassword: '',
     registerConfirm: '',
   });
 
   // 表单提交状态
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 登录/注册成功状态
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // 处理 tab 变化
   const handleTabChange = (value: string) => {
@@ -66,6 +77,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
     let field = '';
 
     if (id === 'register-email') field = 'email';
+    else if (id === 'register-username') field = 'userName';
     else if (id === 'register-password') field = 'password';
     else if (id === 'register-confirm') field = 'confirmPassword';
 
@@ -77,6 +89,8 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
     // 清除对应的错误信息
     if (id === 'register-email') {
       setErrors({ ...errors, registerEmail: '' });
+    } else if (id === 'register-username') {
+      setErrors({ ...errors, registerUserName: '' });
     } else if (id === 'register-password') {
       setErrors({ ...errors, registerPassword: '' });
     } else if (id === 'register-confirm') {
@@ -91,7 +105,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
   };
 
   // 处理登录提交
-  const handleLoginSubmit = () => {
+  const handleLoginSubmit = async () => {
     let valid = true;
     const newErrors = { ...errors };
 
@@ -112,19 +126,49 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
 
     if (valid) {
       setIsSubmitting(true);
-      // 这里可以添加实际的登录逻辑，例如调用 API
-      console.log('登录表单提交', loginForm);
 
-      // 模拟 API 调用
-      setTimeout(() => {
+      try {
+        // 加密密码
+        const encryptedPassword = await encrypt(loginForm.password);
+        if (typeof encryptedPassword === 'boolean' && !encryptedPassword) {
+          toast.error('加密错误');
+          return;
+        }
+        // 调用登录API
+        const response = await login(loginForm.email, encryptedPassword);
+
+        if (response) {
+          useUserStore.setState({ token: response.token });
+          // 获取用户信息
+          const userInfo = await fetchUserInfo(response.userId);
+
+          if (userInfo) {
+            // 存储用户信息到store
+            loginUser(
+              {
+                userId: String(userInfo.userId),
+                userName: userInfo.userName,
+                email: userInfo.email,
+                avatar: userInfo.avatarUrl || '',
+              },
+              response.token
+            );
+
+            setIsSuccess(true);
+            toast.success(`欢迎回来，${userInfo.userName}！`);
+          }
+        }
+      } catch (error) {
+        console.error('登录失败:', error);
+        toast.error('请检查输入的邮箱或密码');
+      } finally {
         setIsSubmitting(false);
-        // 登录成功后的逻辑
-      }, 1500);
+      }
     }
   };
 
   // 处理注册提交
-  const handleRegisterSubmit = () => {
+  const handleRegisterSubmit = async () => {
     let valid = true;
     const newErrors = { ...errors };
 
@@ -133,6 +177,11 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
       valid = false;
     } else if (!validateEmail(registerForm.email)) {
       newErrors.registerEmail = '请输入有效的邮箱地址';
+      valid = false;
+    }
+
+    if (!registerForm.userName) {
+      newErrors.registerUserName = '请输入用户名';
       valid = false;
     }
 
@@ -156,14 +205,52 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
 
     if (valid) {
       setIsSubmitting(true);
-      // 这里可以添加实际的注册逻辑，例如调用 API
-      console.log('注册表单提交', registerForm);
 
-      // 模拟 API 调用
-      setTimeout(() => {
+      try {
+        // 加密密码
+        const encryptedPassword = await encrypt(registerForm.password);
+
+        if (typeof encryptedPassword === 'boolean' && !encryptedPassword) {
+          toast.error('加密错误');
+          return;
+        }
+
+        // 调用注册API
+        const response = await register(
+          registerForm.userName,
+          registerForm.email,
+          encryptedPassword
+        );
+
+        if (response) {
+          // 存储token到store
+          useUserStore.setState({ token: response.token });
+
+          // 获取用户信息
+          const userInfo = await fetchUserInfo(response.userId);
+
+          if (userInfo) {
+            // 存储用户信息到store
+            loginUser(
+              {
+                userId: String(userInfo.userId),
+                userName: userInfo.userName,
+                email: userInfo.email,
+                avatar: userInfo.avatarUrl || '',
+              },
+              response.token
+            );
+
+            setIsSuccess(true);
+            toast.success(`${userInfo.userName}，欢迎加入！`);
+          }
+        }
+      } catch (error) {
+        console.error('注册失败:', error);
+        toast.error('注册过程中出现错误，请重试');
+      } finally {
         setIsSubmitting(false);
-        // 注册成功后的逻辑
-      }, 1500);
+      }
     }
   };
 
@@ -202,8 +289,8 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
           <Button className="pl-0" variant="link">
             忘记密码
           </Button>
-          <Button className="px-8" onClick={handleLoginSubmit} disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="animate-spin" />}
+          <Button className="px-8" onClick={handleLoginSubmit} disabled={isSubmitting || isSuccess}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSubmitting ? '登录中...' : '登录'}
           </Button>
         </div>
@@ -220,6 +307,20 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             className={cn(errors.registerEmail && 'border-danger')}
           />
           {errors.registerEmail && <p className="text-danger text-sm">{errors.registerEmail}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="register-username">用户名</Label>
+          <Input
+            id="register-username"
+            type="text"
+            placeholder="请输入用户名"
+            value={registerForm.userName}
+            onChange={handleRegisterChange}
+            className={cn(errors.registerUserName && 'border-danger')}
+          />
+          {errors.registerUserName && (
+            <p className="text-danger text-sm">{errors.registerUserName}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="register-password">密码</Label>
@@ -250,8 +351,12 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
           )}
         </div>
         <div className="mt-8 flex">
-          <Button className="w-full" onClick={handleRegisterSubmit} disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="animate-spin" />}
+          <Button
+            className="w-full"
+            onClick={handleRegisterSubmit}
+            disabled={isSubmitting || isSuccess}
+          >
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSubmitting ? '注册中...' : '注册'}
           </Button>
         </div>

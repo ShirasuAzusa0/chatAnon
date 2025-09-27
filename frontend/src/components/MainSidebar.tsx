@@ -1,4 +1,6 @@
-import { MessagesSquare, Home, Star, BookUser, ChevronDown } from 'lucide-react';
+import { Home, Star, BookUser, ChevronDown, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { fetchChatHistoryList, type ChatHistory } from '@/api/chat';
 
 import {
   Sidebar,
@@ -16,6 +18,7 @@ import {
 import { Link } from 'react-router';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { UserInfo } from '@/components/UserInfo.tsx';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 // Menu items.
 const items = [
@@ -24,11 +27,11 @@ const items = [
     url: '/',
     icon: Home,
   },
-  {
-    title: '论坛',
-    url: '/forum',
-    icon: MessagesSquare,
-  },
+  // {
+  //   title: '论坛',
+  //   url: '/forum',
+  //   icon: MessagesSquare,
+  // },
   {
     title: '收藏角色',
     url: '/favorite-role',
@@ -41,19 +44,34 @@ const items = [
   },
 ];
 
-// Chat history items.
-const chatHistory = [
-  {
-    title: '和Anon的聊天',
-    id: '10001',
-  },
-  {
-    title: '和Saki的聊天',
-    id: '10002',
-  },
-];
-
 export function MainSidebar() {
+  // 添加聊天历史状态
+  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 获取聊天历史数据
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await fetchChatHistoryList();
+        // 按照lastUpdateTime排序，最新的在最上面
+        const sortedData = [...data].sort(
+          (a, b) => new Date(b.lastUpdateTime).getTime() - new Date(a.lastUpdateTime).getTime()
+        );
+        setChatHistory(sortedData);
+      } catch (err) {
+        console.error('获取聊天历史失败:', err);
+        setError('获取聊天历史失败');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChatHistory();
+  }, []);
   return (
     <Sidebar variant="inset" collapsible="icon">
       {/* 侧边栏顶部 */}
@@ -64,6 +82,9 @@ export function MainSidebar() {
               <div className="h-8 w-8 overflow-hidden rounded-md">
                 <img className="h-full object-cover" src="/icon.png" alt="icon" />
               </div>
+              <span className="absolute left-20 w-30 text-lg font-bold select-none group-data-[state=collapsed]:opacity-0">
+                Anon Chat
+              </span>
             </div>
           </Link>
           <SidebarTrigger className="group-data-[state=collapsed]:absolute group-data-[state=collapsed]:top-1/2 group-data-[state=collapsed]:right-2 group-data-[state=collapsed]:z-10 group-data-[state=collapsed]:-translate-y-1/2 group-data-[state=collapsed]:p-4.5 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:group-hover/header:opacity-100" />
@@ -99,15 +120,31 @@ export function MainSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {chatHistory.map((chatItem) => (
-                    <SidebarMenuItem key={chatItem.title}>
-                      <SidebarMenuButton asChild>
-                        <Link to={`/chat/${chatItem.id}`}>
-                          <span>{chatItem.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-2">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>加载中...</span>
+                    </div>
+                  ) : error ? (
+                    <div className="py-2 text-center text-sm text-red-500">{error}</div>
+                  ) : chatHistory.length === 0 ? (
+                    <div className="text-muted-foreground py-2 text-center text-sm">
+                      暂无聊天历史
+                    </div>
+                  ) : (
+                    chatHistory.map((chatItem) => (
+                      <SidebarMenuItem key={chatItem.chatId}>
+                        <SidebarMenuButton asChild>
+                          <Link to={`/chat/${chatItem.chatId}`}>
+                            <span>{chatItem.chatName}</span>
+                            <span className="text-muted-foreground ml-auto text-xs">
+                              {new Date(chatItem.lastUpdateTime).toLocaleDateString()}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))
+                  )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>
@@ -118,7 +155,12 @@ export function MainSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <UserInfo />
+            <div className="flex items-center gap-2">
+              <UserInfo />
+              <div className="group-data-[state=collapsed]:hidden">
+                <ModeToggle />
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

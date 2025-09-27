@@ -30,7 +30,7 @@ function RoleCard({ id, name, description, image, collections = 0, likes = 0 }: 
               <Button
                 size="sm"
                 variant="secondary"
-                className="bg-white/30 backdrop-blur-md hover:bg-white/80"
+                className="bg-white/30 backdrop-blur-md hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/30"
               >
                 查看角色
               </Button>

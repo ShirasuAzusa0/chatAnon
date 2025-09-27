@@ -1,11 +1,13 @@
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import homeBgImage from '/home-bg.png';
-import { useState, type KeyboardEvent } from 'react';
+import { useState, useEffect, type KeyboardEvent } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
 import { cn } from '@/lib/utils';
+import { fetchRoleTags, type RoleTag } from '@/api/roles';
 
 interface SearchBarProps {
   isSearching?: boolean;
@@ -14,6 +16,13 @@ interface SearchBarProps {
 
 function SearchBar({ isSearching = false, param }: SearchBarProps) {
   const [serachParam, setSearchParam] = useState(param || '');
+  const [tagsList, setTagsList] = useState<RoleTag[]>([]);
+
+  useEffect(() => {
+    if (!isSearching) {
+      fetchRoleTags().then((tags) => setTagsList(tags));
+    }
+  }, [isSearching]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -31,6 +40,17 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
     }
     isSearching = true;
     navigate(`/search/${serachParam}`);
+  };
+
+  // 为每个标签生成随机色相并缓存
+  const [tagHues] = useState(() =>
+    Array.from({ length: 8 }, () => Math.floor(Math.random() * 360))
+  );
+
+  const handleTagClick = (tag: string) => {
+    console.log(`选择了标签: ${tag}`);
+    isSearching = true;
+    navigate(`/search/tag/${tag}`);
   };
 
   return (
@@ -54,32 +74,71 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
       {!isSearching && (
         <>
           {/* 白色透明层作为前景 */}
-          <div className="absolute inset-0 z-0 bg-linear-to-b from-white/90 to-white"></div>
-          <h1 className="relative z-10 mb-8 text-center text-4xl font-bold">寻找你的专属角色</h1>
+          <div className="to-background from-background/90 dark:from-background/60 absolute inset-0 z-0 bg-linear-to-b"></div>
+          <h1 className="relative z-10 mb-4 text-center text-4xl font-bold">Anon Chat</h1>
+          <h1 className="text-primary/80 relative z-10 mb-8 text-center text-3xl font-bold">
+            寻找你的专属角色
+          </h1>
         </>
       )}
-      <div className="relative z-10 mx-auto w-full max-w-3xl">
-        <div className="group relative">
-          <Input
-            type="text"
-            value={serachParam}
-            onChange={(e) => setSearchParam(e.target.value)}
-            placeholder="搜索你感兴趣的角色..."
-            onKeyDown={handleKeyDown}
-            className={cn(
-              'border-primary/10 h-16 w-full rounded-full border-2 bg-white pr-24 pl-6 text-lg shadow-lg duration-300 placeholder:text-gray-400 hover:shadow-xl focus-visible:ring-2'
-            )}
-          />
-          <div className="absolute top-1/2 right-3 -translate-y-1/2">
-            <Button
-              className="bg-primary hover:bg-primary/90 h-10 w-10 rounded-full transition-colors"
-              onClick={handleSearch}
-            >
-              <Search />
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-4">
+        {/* 搜索框主体 */}
+        <div className="flex w-full items-center">
+          {isSearching && (
+            <Button variant="outline" size="sm" className="mr-4" onClick={() => navigate('/')}>
+              返回
             </Button>
+          )}
+          <div className="group relative w-full">
+            <Input
+              type="text"
+              value={serachParam}
+              onChange={(e) => setSearchParam(e.target.value)}
+              placeholder="搜索你感兴趣的角色..."
+              onKeyDown={handleKeyDown}
+              className={cn(
+                'border-primary/10 border- h-16 w-full rounded-full pr-24 pl-6 text-lg shadow-lg duration-300 placeholder:text-gray-400 hover:shadow-xl focus-visible:ring-2',
+                isSearching ? 'h-12' : ''
+              )}
+            />
+            <div className="absolute top-1/2 right-3 -translate-y-1/2">
+              <Button
+                className={cn(
+                  'bg-primary hover:bg-primary/90 h-10 w-10 rounded-full transition-colors',
+                  isSearching ? 'h-8' : ''
+                )}
+                onClick={handleSearch}
+              >
+                <Search />
+              </Button>
+            </div>
           </div>
         </div>
-        <div className="from-primary/5 to-secondary/5 pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r"></div>
+
+        {/* 标签按钮组 */}
+        {!isSearching && (
+          <div
+            className={cn(
+              'flex w-full flex-wrap items-center justify-center gap-2',
+              isSearching ? 'mt-4' : 'mt-8'
+            )}
+          >
+            <span className="text-sm font-medium text-gray-500">选择角色标签：</span>
+            {tagsList.map((tag, index) => (
+              <Badge
+                key={tag.tagId}
+                style={{
+                  backgroundColor: `oklch(.95 .025 ${tagHues[index]})`,
+                  color: `oklch(.55 .12 ${tagHues[index]})`,
+                }}
+                className="cursor-pointer px-3 py-1 text-sm font-medium transition-all hover:scale-105"
+                onClick={() => handleTagClick(tag.tagName)}
+              >
+                {tag.tagName}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
