@@ -6,5 +6,5 @@ role_category = Table(
     "role_category",
     db.metadata,
     Column("roleId", ForeignKey("roles.roleId"), primary_key=True, nullable=False),
-    Column("tagId", ForeignKey("rolecategories.tagId"), primary_key=True, nullable=False)
+    Column("roleTagId", ForeignKey("rolecategories.roleTagId"), primary_key=True, nullable=False)
 )

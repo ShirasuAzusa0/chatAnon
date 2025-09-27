@@ -1,5 +1,6 @@
 from flask import request
 from flask_restful import Resource
+from sqlalchemy import VARCHAR
 
 from resources import api
 
@@ -17,9 +18,7 @@ class RoleResource(Resource):
             res = {
                 'status': 'success',
                 'msg': '角色详细信息获取成功',
-                'data': {
-                    'role': role.serialize_mode2()
-                }
+                'data': role.serialize_mode2()
             }
             if userId is None:
                 return res
@@ -47,9 +46,7 @@ class RecommendRoleListResource(Resource):
             return {
                 'status': 'success',
                 'msg': '推荐角色列表获取成功',
-                'data': {
-                    'roles': [role.serialize_mode1() for role in recommend_roles]
-                }
+                'data': [role.serialize_mode1() for role in recommend_roles]
             }
 
 class NewestRoleResource(Resource):
@@ -62,13 +59,27 @@ class NewestRoleResource(Resource):
                 'msg': '获取最新角色列表失败'
             }, 404
         else:
-            newest_roles = [role_model for role_model, _ in role_list]
+            newest_roles = [role_model for role_model in role_list]
             return {
                 'status': 'success',
                 'msg': '最新角色列表获取成功',
-                'data': {
-                    'roles': [role.serialize_mode1() for role in newest_roles]
-                }
+                'data': [role.serialize_mode1() for role in newest_roles]
+            }
+
+class SearchRoleResource(Resource):
+    # 搜索获取角色概览信息
+    def get(self, search:VARCHAR):
+        search_list = RolesService().get_roles_by_search(search)
+        if search_list:
+            return {
+                'status': 'success',
+                'msg': '已找到所搜索的角色！',
+                'data': [role.serialize_mode1() for role in search_list]
+            }, 200
+        else:
+            return {
+                'status': 'fail',
+                'msg': '搜索的角色不存在！'
             }
 
 class PostRoleResource(Resource):
@@ -218,5 +229,6 @@ api.add_resource(NewestRoleResource, '/api/role-list/newest')
 api.add_resource(PostRoleResource, '/api/role-list/create-role')
 api.add_resource(RoleLikesResource, '/api/role-list/role/<int:roleId>/likes')
 api.add_resource(FavoriteRoleResource, '/api/role-list/role/<int:roleId>/favorite')
-api.add_resource(UserFavoriteRoleListResource, '/api/user/role/favorite')
-api.add_resource(UserReleasedRoleListResource, '/api/user/role/released')
+api.add_resource(UserFavoriteRoleListResource, '/api/role-list/favorite')
+api.add_resource(UserReleasedRoleListResource, '/api/role-list/released')
+api.add_resource(SearchRoleResource, '/api/role-list/search/<string:search>')
