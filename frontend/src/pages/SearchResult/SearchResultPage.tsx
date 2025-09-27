@@ -31,15 +31,15 @@ export default function SearchResultPage() {
   return (
     <section className="relative mx-auto space-y-10 p-4">
       {!tagName ? (
-        <div className="sticky top-[-48px] z-10 h-30 bg-linear-to-b from-white to-white/50 backdrop-blur-xl lg:mx-[-16px]">
+        <div className="from-background to-background/50 sticky top-[-48px] z-10 h-30 bg-linear-to-b backdrop-blur-xl lg:mx-[-16px]">
           <SearchBar isSearching param={searchParam} />
         </div>
       ) : (
-        <div className="sticky top-0 z-10 mx-[-16px] mt-[-16px] mb-0 flex items-center bg-white/50 p-4 backdrop-blur-xl">
+        <div className="bg-background/50 sticky top-0 z-10 mx-[-16px] mt-[-16px] mb-0 flex items-center p-4 backdrop-blur-xl">
           <Button variant="outline" size="sm" className="mr-4" onClick={() => navigate(-1)}>
             返回
           </Button>
-          <span className="text-lg font-bold text-neutral-800">{tagName} 标签下的所有角色：</span>
+          <span className="text-primary text-lg font-bold">{tagName} 标签下的所有角色：</span>
         </div>
       )}
 

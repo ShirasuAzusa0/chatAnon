@@ -74,7 +74,7 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
       {!isSearching && (
         <>
           {/* 白色透明层作为前景 */}
-          <div className="absolute inset-0 z-0 bg-linear-to-b from-white/90 to-white"></div>
+          <div className="to-background from-background/90 dark:from-background/60 absolute inset-0 z-0 bg-linear-to-b"></div>
           <h1 className="relative z-10 mb-4 text-center text-4xl font-bold">Anon Chat</h1>
           <h1 className="text-primary/80 relative z-10 mb-8 text-center text-3xl font-bold">
             寻找你的专属角色
@@ -97,7 +97,7 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
               placeholder="搜索你感兴趣的角色..."
               onKeyDown={handleKeyDown}
               className={cn(
-                'border-primary/10 h-16 w-full rounded-full border-2 bg-white pr-24 pl-6 text-lg shadow-lg duration-300 placeholder:text-gray-400 hover:shadow-xl focus-visible:ring-2',
+                'border-primary/10 border- h-16 w-full rounded-full pr-24 pl-6 text-lg shadow-lg duration-300 placeholder:text-gray-400 hover:shadow-xl focus-visible:ring-2',
                 isSearching ? 'h-12' : ''
               )}
             />

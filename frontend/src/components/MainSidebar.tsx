@@ -16,6 +16,7 @@ import {
 import { Link } from 'react-router';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { UserInfo } from '@/components/UserInfo.tsx';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 // Menu items.
 const items = [
@@ -121,7 +122,12 @@ export function MainSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <UserInfo />
+            <div className="flex items-center gap-2">
+              <UserInfo />
+              <div className="group-data-[state=collapsed]:hidden">
+                <ModeToggle />
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
