@@ -13,7 +13,7 @@ export interface UserInfo {
 }
 
 // 获取公钥
-export const getPublicKey = async () => {
+export const fetchPublicKey = async () => {
   return await get<{ msg: string; key: string }>('/login/publicKey');
 };
 
@@ -28,6 +28,6 @@ export const register = async (account: string, email: string, password: string)
 };
 
 // 获取用户信息
-export const getUserInfo = async (userId: number) => {
+export const fetchUserInfo = async (userId: number) => {
   return await get<UserInfo>(`/api/user/${userId}`);
 };

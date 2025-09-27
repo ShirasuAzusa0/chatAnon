@@ -18,12 +18,13 @@ import LoginDialog from './LoginDialog';
 
 export function UserInfo() {
   const { user, isLoggedIn, logout } = useUserStore();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    setIsDialogOpen(false);
+    setIsAlertDialogOpen(false);
+    setIsLoginDialogOpen(false);
   };
 
   if (!isLoggedIn || !user) {
@@ -56,7 +57,7 @@ export function UserInfo() {
         </div>
       </div>
 
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
         <AlertDialogTrigger asChild>
           <Button variant="ghost" size="icon" className="group-data-[state=collapsed]:hidden">
             <LogOut className="h-4 w-4" />
@@ -65,9 +66,7 @@ export function UserInfo() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>确认退出登录</AlertDialogTitle>
-            <AlertDialogDescription>
-              您确定要退出登录吗？退出后需要重新登录才能使用账户功能。
-            </AlertDialogDescription>
+            <AlertDialogDescription>您确定要退出登录吗？</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
