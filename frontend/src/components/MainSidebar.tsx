@@ -1,4 +1,6 @@
-import { Home, Star, BookUser, ChevronDown } from 'lucide-react';
+import { Home, Star, BookUser, ChevronDown, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { fetchChatHistoryList, type ChatHistory } from '@/api/chat';
 
 import {
   Sidebar,
@@ -42,19 +44,34 @@ const items = [
   },
 ];
 
-// Chat history items.
-const chatHistory = [
-  {
-    title: '和Anon的聊天',
-    id: '10001',
-  },
-  {
-    title: '和Saki的聊天',
-    id: '10002',
-  },
-];
-
 export function MainSidebar() {
+  // 添加聊天历史状态
+  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 获取聊天历史数据
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await fetchChatHistoryList();
+        // 按照lastUpdateTime排序，最新的在最上面
+        const sortedData = [...data].sort(
+          (a, b) => new Date(b.lastUpdateTime).getTime() - new Date(a.lastUpdateTime).getTime()
+        );
+        setChatHistory(sortedData);
+      } catch (err) {
+        console.error('获取聊天历史失败:', err);
+        setError('获取聊天历史失败');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChatHistory();
+  }, []);
   return (
     <Sidebar variant="inset" collapsible="icon">
       {/* 侧边栏顶部 */}
@@ -103,15 +120,31 @@ export function MainSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {chatHistory.map((chatItem) => (
-                    <SidebarMenuItem key={chatItem.title}>
-                      <SidebarMenuButton asChild>
-                        <Link to={`/chat/${chatItem.id}`}>
-                          <span>{chatItem.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-2">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>加载中...</span>
+                    </div>
+                  ) : error ? (
+                    <div className="py-2 text-center text-sm text-red-500">{error}</div>
+                  ) : chatHistory.length === 0 ? (
+                    <div className="text-muted-foreground py-2 text-center text-sm">
+                      暂无聊天历史
+                    </div>
+                  ) : (
+                    chatHistory.map((chatItem) => (
+                      <SidebarMenuItem key={chatItem.chatId}>
+                        <SidebarMenuButton asChild>
+                          <Link to={`/chat/${chatItem.chatId}`}>
+                            <span>{chatItem.chatName}</span>
+                            <span className="text-muted-foreground ml-auto text-xs">
+                              {new Date(chatItem.lastUpdateTime).toLocaleDateString()}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))
+                  )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>

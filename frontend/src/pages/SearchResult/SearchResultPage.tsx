@@ -39,7 +39,7 @@ export default function SearchResultPage() {
           <Button variant="outline" size="sm" className="mr-4" onClick={() => navigate(-1)}>
             返回
           </Button>
-          <span className="text-primary text-lg font-bold">{tagName} 标签下的所有角色：</span>
+          <span className="text-primary text-lg font-bold">{tagName} 标签下的所有角色</span>
         </div>
       )}
 

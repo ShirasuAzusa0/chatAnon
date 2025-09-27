@@ -78,3 +78,13 @@ export const createCustomRole = async (roleName: string, description: string, at
   formData.append('attachment', attachment);
   return await post<RoleData>('api/role-list/new', formData);
 };
+
+// 获取用户收藏的角色列表
+export const fetchFavoriteRoleList = async () => {
+  return await get<RoleData[]>('/api/role-list/favorite');
+};
+
+// 获取历史的聊天角色列表
+export const fetchHistroyRoleList = async () => {
+  return await get<RoleData[]>('/api/role-list/history');
+};
