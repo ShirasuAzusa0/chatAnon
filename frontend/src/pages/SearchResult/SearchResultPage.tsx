@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import { useEffect, useState } from 'react';
 import { fetchSearchRoleList, type RoleData } from '@/api/roles';
 import RoleCard from '@/components/RoleCard';
+import NewRoleCard from '@/components/NewRoleCard';
 
 export default function SearchResultPage() {
   const { searchParam } = useParams();
@@ -21,7 +22,7 @@ export default function SearchResultPage() {
 
   return (
     <section className="mx-auto p-4 space-y-10 relative">
-      <div className="sticky top-[-40px] lg:mx-[-16px] z-100 bg-linear-to-b from-white to-white/50 backdrop-blur-xl h-30">
+      <div className="sticky top-[-40px] lg:mx-[-16px] z-10 bg-linear-to-b from-white to-white/50 backdrop-blur-xl h-30">
         <SearchBar isSearching param={searchParam} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -36,6 +37,7 @@ export default function SearchResultPage() {
             likes={role.likesCount}
           />
         ))}
+        <NewRoleCard />
       </div>
     </section>
   );
