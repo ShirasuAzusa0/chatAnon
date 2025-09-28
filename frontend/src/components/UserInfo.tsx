@@ -15,16 +15,19 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import LoginDialog from './LoginDialog';
+import { useNavigate } from 'react-router';
 
 export function UserInfo() {
   const { user, isLoggedIn, logout } = useUserStore();
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     setIsAlertDialogOpen(false);
     setIsLoginDialogOpen(false);
+    navigate('/');
   };
 
   if (!isLoggedIn || !user) {

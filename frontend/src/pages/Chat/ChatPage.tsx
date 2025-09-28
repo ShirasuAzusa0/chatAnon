@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useUserStore } from '@/stores/userStore';
 import RoleDetailPanel, { type UserDetail } from '@/components/RoleDetailPanel';
+import { fetchChatMessages, sendMessage, type ChatMessage } from '@/api/chat';
+import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
 
 type Message = {
   id: string;
@@ -21,73 +23,143 @@ type ChatTarget = {
   avatar: string;
 };
 
+type LoadingState = {
+  messages: boolean;
+  roleDetail: boolean;
+  sending: boolean;
+};
+
 function ChatPage() {
   const { chatId } = useParams();
   const currentUser = useUserStore((s) => s.user);
   const [showDetail, setShowDetail] = useState<boolean>(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [roleDetail, setRoleDetail] = useState<RoleDetailInfo | null>(null);
+  const [loading, setLoading] = useState<LoadingState>({
+    messages: false,
+    roleDetail: false,
+    sending: false,
+  });
+  const listRef = useRef<HTMLDivElement | null>(null);
 
-  // 模拟根据 chatId 获取聊天对象信息（实际应由 ViewModel/接口提供）
+  // 根据 chatId 获取聊天对象信息
   const target: ChatTarget = useMemo(() => {
     const fallbackId = chatId ?? 'unknown';
     return {
       userId: fallbackId,
-      name: `用户 ${fallbackId}`,
-      bio: '这个人很神秘，什么也没有留下。',
-      avatar: '/icon.png',
+      name: roleDetail?.roleName ?? `用户 ${fallbackId}`,
+      bio: roleDetail?.description ?? '这个人很神秘，什么也没有留下。',
+      avatar: roleDetail?.avatarURL ?? '/icon.png',
     };
-  }, [chatId]);
+  }, [chatId, roleDetail]);
 
   const targetDetail: UserDetail = useMemo(
     () => ({
       userId: target.userId,
       name: target.name,
-      avatarLarge: '/home-bg.png',
-      tags: ['匿名', '兴趣广泛', '活跃'],
-      bio: `${target.bio}\n\n她正在使用 chatAnon 与你交流。`,
+      avatarLarge: roleDetail?.avatarURL ?? '',
+      tags: [],
+      bio: target?.bio,
     }),
-    [target]
+    [target, roleDetail]
   );
 
-  const [messages, setMessages] = useState<Message[]>(() => [
-    {
-      id: 'm1',
-      senderId: target.userId,
-      content: '你好～很高兴认识你！',
-      createdAt: Date.now() - 1000 * 60 * 5,
-    },
-    {
-      id: 'm2',
-      senderId: currentUser?.userId ?? 'me',
-      content: '嗨，咱们开始聊天吧。',
-      createdAt: Date.now() - 1000 * 60 * 4,
-    },
-    {
-      id: 'm1',
-      senderId: target.userId,
-      content: '你好～很高兴认识你！',
-      createdAt: Date.now() - 1000 * 60 * 5,
-    },
-  ]);
+  // 获取聊天记录
+  useEffect(() => {
+    const loadChatMessages = async () => {
+      if (!chatId) return;
 
-  const [inputValue, setInputValue] = useState<string>('');
-  const listRef = useRef<HTMLDivElement | null>(null);
+      setLoading((prev) => ({ ...prev, messages: true }));
+      try {
+        const chatMessages = await fetchChatMessages(Number(chatId));
+        const formattedMessages: Message[] = chatMessages.map((msg: ChatMessage) => ({
+          id: msg.id.toString(),
+          senderId: msg.role === 'user' ? (currentUser?.userId ?? 'me') : 'assistant',
+          content: msg.content,
+          createdAt: new Date(msg.time).getTime(),
+        }));
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error('获取聊天记录失败:', error);
+      } finally {
+        setLoading((prev) => ({ ...prev, messages: false }));
+      }
+    };
+
+    loadChatMessages();
+  }, [chatId, currentUser?.userId]);
+
+  // 获取角色详情
+  useEffect(() => {
+    const loadRoleDetail = async () => {
+      if (!chatId) return;
+
+      setLoading((prev) => ({ ...prev, roleDetail: true }));
+      try {
+        const detail = await fetchRoleDetail(Number(chatId));
+        setRoleDetail(detail);
+      } catch (error) {
+        console.error('获取角色详情失败:', error);
+      } finally {
+        setLoading((prev) => ({ ...prev, roleDetail: false }));
+      }
+    };
+
+    loadRoleDetail();
+  }, [chatId]);
 
   useEffect(() => {
     if (!listRef.current) return;
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages]);
 
-  const handleSend = () => {
-    const trimmed = inputValue.trim();
-    if (!trimmed) return;
-    const newMsg: Message = {
-      id: `${Date.now()}`,
+  const handleSend = async () => {
+    const trimmedMsg = inputValue.trim();
+    if (!trimmedMsg || !chatId || loading.sending) return;
+
+    setLoading((prev) => ({ ...prev, sending: true }));
+
+    // 立即显示用户消息
+    const tempMsg: Message = {
+      id: `temp-${Date.now()}`,
       senderId: currentUser?.userId ?? 'me',
-      content: trimmed,
+      content: trimmedMsg,
       createdAt: Date.now(),
     };
-    setMessages((prev) => [...prev, newMsg]);
+    setMessages((prev) => [...prev, tempMsg]);
     setInputValue('');
+
+    try {
+      const response = await sendMessage(
+        Number(chatId),
+        'user',
+        new Date().toISOString(),
+        trimmedMsg
+      );
+
+      // 替换临时消息为真实消息
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempMsg.id
+            ? {
+                id: response.id.toString(),
+                senderId: currentUser?.userId ?? 'me',
+                content: response.content,
+                createdAt: new Date(response.time).getTime(),
+              }
+            : msg
+        )
+      );
+    } catch (error) {
+      console.error('发送消息失败:', error);
+      // 移除临时消息
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempMsg.id));
+      // 恢复输入内容
+      setInputValue(trimmedMsg);
+    } finally {
+      setLoading((prev) => ({ ...prev, sending: false }));
+    }
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
@@ -108,7 +180,7 @@ function ChatPage() {
           </Avatar>
           <div className="min-w-0">
             <div className="truncate text-sm font-medium">{target.name}</div>
-            <div className="text-muted-foreground truncate text-xs">{target.bio}</div>
+            <div className="text-muted-foreground max-w-lg truncate text-xs">{target.bio}</div>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={() => setShowDetail((v) => !v)}>
@@ -123,26 +195,36 @@ function ChatPage() {
         <div className="flex min-w-0 flex-1 flex-col">
           {/* 中部：消息列表 */}
           <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-            {messages.map((message) => {
-              const isMe = message.senderId === (currentUser?.userId ?? 'me');
-              return (
-                <div
-                  key={message.id}
-                  className={`flex items-end ${isMe ? 'justify-end' : 'justify-start'}`}
-                >
+            {loading.messages ? (
+              <div className="flex justify-center py-8">
+                <div className="text-muted-foreground text-sm">加载聊天记录中...</div>
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex justify-center py-8">
+                <div className="text-muted-foreground text-sm">暂无聊天记录</div>
+              </div>
+            ) : (
+              messages.map((message) => {
+                const isMe = message.senderId === (currentUser?.userId ?? 'me');
+                return (
                   <div
-                    className={
-                      'max-w-[75%] rounded-lg px-3 py-2 text-sm shadow-xs ' +
-                      (isMe
-                        ? 'bg-primary text-primary-foreground rounded-br-none'
-                        : 'bg-accent text-accent-foreground rounded-bl-none')
-                    }
+                    key={message.id}
+                    className={`flex items-end ${isMe ? 'justify-end' : 'justify-start'}`}
                   >
-                    {message.content}
+                    <div
+                      className={
+                        'max-w-[75%] rounded-lg px-3 py-2 text-sm shadow-xs ' +
+                        (isMe
+                          ? 'bg-primary text-primary-foreground rounded-br-none'
+                          : 'bg-accent text-accent-foreground rounded-bl-none')
+                      }
+                    >
+                      {message.content}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
 
           {/* 底部：输入与发送 */}
@@ -154,15 +236,25 @@ function ChatPage() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={onKeyDown}
               />
-              <Button onClick={handleSend} disabled={!inputValue.trim()}>
-                发送
+              <Button onClick={handleSend} disabled={!inputValue.trim() || loading.sending}>
+                {loading.sending ? '发送中...' : '发送'}
               </Button>
             </div>
           </div>
         </div>
 
         {/* 右侧：用户详情面板 */}
-        {showDetail ? <RoleDetailPanel user={targetDetail} /> : null}
+        {showDetail && (
+          <div className="w-full max-w-[360px] border-l">
+            {loading.roleDetail ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="text-muted-foreground text-sm">加载角色详情中...</div>
+              </div>
+            ) : (
+              <RoleDetailPanel user={targetDetail} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
