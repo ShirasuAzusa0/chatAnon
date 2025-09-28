@@ -12,7 +12,14 @@ export interface ChatMessage {
   roleId: number; // 角色id
   content: string; // 消息内容
   time: string; // 消息发送时间
-  attachment_id?: number; // 用户上传附件（图片）的url
+  attachmentUrl?: number; // 用户上传附件（图片）的url
+}
+
+export interface ChatRoom {
+  chatId: number;
+  chatName: string;
+  lastUpdateTime: string;
+  description: string;
 }
 
 // 获取侧边栏历史聊天列表
@@ -35,10 +42,20 @@ export const sendMessage = async (
   if (attachment) {
     formData.append('attachment', attachment);
   }
-  return await post<ChatMessage>(`/api/chat/${chatId}`, formData);
+  return await post<ChatMessage, FormData>(`/api/chat/${chatId}`, formData);
+};
+
+// 获取AI角色回复的消息,在发送消息后调用
+export const receiveMessageResponse = async (chatId: number, latestMessageId: number) => {
+  return await get<ChatMessage>(`/api/chat/${chatId}/receive`, { latestMessageId });
 };
 
 // 获取某个聊天室的具体聊天记录
 export const fetchChatMessages = async (chatId: number) => {
   return await get<ChatMessage[]>(`/api/chat/${chatId}`);
+};
+
+// 查询或新建聊天室
+export const queryRoleChat = async (roleId: number, userId: number) => {
+  return await post<ChatRoom>('/api/chat', { roleId, userId });
 };

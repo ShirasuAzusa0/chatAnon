@@ -48,7 +48,6 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
   );
 
   const handleTagClick = (tag: string) => {
-    console.log(`选择了标签: ${tag}`);
     isSearching = true;
     navigate(`/search/tag/${tag}`);
   };

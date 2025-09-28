@@ -40,6 +40,18 @@ export interface RoleTag {
   tagName: string;
 }
 
+/**
+ * 角色具体信息模型
+ */
+export interface RoleDetailInfo {
+  avatarURL: string;
+  description: string;
+  favoriteCount: number;
+  likesCount: number;
+  roleId: number;
+  roleName: string;
+}
+
 // 获取聊天角色推荐列表
 export const fetchRecommendedRoleList = async () => {
   return await get<RoleData[]>('/api/role-list/recommended');
@@ -56,8 +68,8 @@ export const fetchRoleTags = async () => {
 };
 
 // 获取具体角色内容
-export const fetchRoleDetail = async () => {
-  return await get<RoleData>('/api/role-list/tags');
+export const fetchRoleDetail = async (roleId: number) => {
+  return await get<RoleDetailInfo>(`/api/role-list/role/${roleId}`);
 };
 
 // 获取搜索角色列表
@@ -71,12 +83,18 @@ export const fetchRoleListByTag = async (tagName: string) => {
 };
 
 // 用户创建自定义角色
-export const createCustomRole = async (roleName: string, description: string, attachment: File) => {
+export const createCustomRole = async (
+  roleName: string,
+  description: string,
+  tags?: string[],
+  attachment?: File
+) => {
   const formData = new FormData();
   formData.append('roleName', roleName);
   formData.append('description', description);
-  formData.append('attachment', attachment);
-  return await post<RoleData>('api/role-list/new', formData);
+  if (tags) formData.append('tags', JSON.stringify(tags));
+  if (attachment) formData.append('attachment', attachment);
+  return await post<{ roleId: number; roleName: string }, FormData>('/api/role-list/new', formData);
 };
 
 // 获取用户收藏的角色列表

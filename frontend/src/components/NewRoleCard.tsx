@@ -4,12 +4,15 @@ import { Button } from './ui/button';
 import { useState } from 'react';
 import { useUserStore } from '@/stores/userStore';
 import LoginDialog from './LoginDialog';
-import NewRoleDialog from './NewRoleDialog';
+import NewRoleDialog, { type NewRoleFormData } from './NewRoleDialog';
+import { createCustomRole } from '@/api/roles';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router';
 
 function NewRoleCard() {
   const [isNewRoleDialogOpen, setIsNewRoleDialogOpen] = useState(false);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
-
+  const navigate = useNavigate();
   const { isLoggedIn } = useUserStore();
 
   const handleCreateNewRole = () => {
@@ -19,6 +22,22 @@ function NewRoleCard() {
       return;
     }
     if (!isNewRoleDialogOpen) setIsNewRoleDialogOpen(true);
+  };
+
+  const handleSubmit = async (data: NewRoleFormData) => {
+    try {
+      const result = data.attachment
+        ? await createCustomRole(data.roleName, data.description, data.tags, data.attachment)
+        : await createCustomRole(data.roleName, data.description, data.tags);
+
+      toast.success(`角色 ${result.roleName} 已成功创建`);
+
+      setIsNewRoleDialogOpen(false);
+      navigate(`/role-info/${result.roleId}`);
+    } catch (error) {
+      console.error('创建角色失败:', error);
+      toast('创建角色时发生错误，请稍后重试');
+    }
   };
 
   return (
@@ -33,7 +52,11 @@ function NewRoleCard() {
         </div>
       </Card>
       <LoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
-      <NewRoleDialog open={isNewRoleDialogOpen} onOpenChange={setIsNewRoleDialogOpen} />
+      <NewRoleDialog
+        open={isNewRoleDialogOpen}
+        onOpenChange={setIsNewRoleDialogOpen}
+        onSubmit={handleSubmit}
+      />
     </>
   );
 }
