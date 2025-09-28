@@ -14,7 +14,8 @@ import {
 } from '@/api/chat';
 import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mic, MicOff } from 'lucide-react';
+import useSpeechRecognition from '@/hooks/useSpeechRecognition';
 
 type Message = {
   id: string;
@@ -51,6 +52,15 @@ function ChatPage() {
     waiting: false,
   });
   const listRef = useRef<HTMLDivElement | null>(null);
+  
+  // 使用语音识别Hook
+  const { 
+    isRecording, 
+    text, 
+    interimText, 
+    startRecording, 
+    stopRecording 
+  } = useSpeechRecognition();
 
   // 根据 chatId 获取聊天对象信息
   const target: ChatTarget = useMemo(() => {
@@ -202,6 +212,28 @@ function ChatPage() {
     }
   };
 
+  // 监听语音识别结果，更新输入框
+  useEffect(() => {
+    if (text) {
+      setInputValue(prev => {
+        // 移除之前可能存在的中间结果标记
+        const baseInput = prev.replace(/\[识别中...\].*$/, '');
+        return baseInput + text;
+      });
+    }
+  }, [text]);
+  
+  // 监听中间结果，更新输入框
+  useEffect(() => {
+    if (interimText) {
+      setInputValue(prev => {
+        // 移除之前可能存在的中间结果标记
+        const baseInput = prev.replace(/\[识别中...\].*$/, '');
+        return baseInput + '[识别中...] ' + interimText;
+      });
+    }
+  }, [interimText]);
+
   return (
     <div className="flex h-[100dvh] flex-col md:h-[calc(100dvh-20px)]">
       {/* 顶部：聊天对象信息 */}
@@ -269,11 +301,22 @@ function ChatPage() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={onKeyDown}
-                disabled={loading.sending || loading.waiting}
+                disabled={loading.sending || loading.waiting || isRecording}
               />
               <Button
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0"
+                onClick={isRecording ? stopRecording : () => startRecording(true)}
+                disabled={loading.sending || loading.waiting}
+              >
+                {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </Button>
+              <Button
                 onClick={handleSend}
-                disabled={!inputValue.trim() || loading.sending || loading.waiting}
+                disabled={
+                  !inputValue.trim() || loading.sending || loading.waiting || isRecording
+                }
               >
                 {loading.sending && <Loader2 className="animate-spin" />}
                 {loading.waiting && <Loader2 className="animate-spin" />}
