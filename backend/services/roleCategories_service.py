@@ -11,8 +11,8 @@ class RoleCategoriesService:
 
     # 通过编号获取角色标签
     def get_tag_by_id(self, roleTagId:INT):
-        return db.session(RoleCategoriesModel, roleTagId)
+        return db.session.get(RoleCategoriesModel, roleTagId)
 
     # 获取标签对应的角色列表
     def get_role_list_by_tagName(self, roleTagName:VARCHAR):
-        return RoleCategoriesModel.query.filter_by(roleTagName=roleTagName).all()
+        return RoleCategoriesModel.query.filter_by(roleTagName=roleTagName).first()

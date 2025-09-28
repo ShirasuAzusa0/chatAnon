@@ -3,10 +3,16 @@ from sqlalchemy import VARCHAR, Select, func, asc
 from models.users_model import UsersModel
 from resources import db
 from datetime import datetime
+from cryptography.hazmat.primitives.asymmetric import padding
+import base64
+from commons.RSAkey_load import load_private_key
 
 class UsersService:
+    def __init__(self):
+        self.private_key = load_private_key()
+
     def get_total_user(self):
-        return db.session.query(func.count(UsersModel.id)).scalar()
+        return db.session.query(func.count(UsersModel.userId)).scalar()
 
     def generate_userId(self):
         num = self.get_total_user()
@@ -48,6 +54,7 @@ class UsersService:
     def login(self, email:VARCHAR, password:VARCHAR):
         query = Select(UsersModel).where(UsersModel.email == email)
         user_model = db.session.scalars(query).first()
+
         if user_model and user_model.password == password:
             user_model.registerDate = datetime.now()
             db.session.commit()

@@ -20,7 +20,7 @@ class SignupResource(Resource):
 
     # 注册
     def post(self):
-        userName = request.json.get('userName', None)
+        userName = request.json.get('account', None)
         email = request.json.get('email', None)
         password = request.json.get('password', None)
 
@@ -35,12 +35,11 @@ class SignupResource(Resource):
 
         userId = UsersService().generate_userId()
 
-        user_model = UsersModel(id=userId,
-                                avatarUrl="https://avatars.githubusercontent.com/u/19370775",
+        user_model = UsersModel(userId=userId,
+                                avatarURL="https://avatars.githubusercontent.com/u/19370775",
                                 userName=userName,
                                 email=email,
                                 password=user_password,
-                                type='user',
                                 selfDescription='这个用户很懒,什么都没有留下',
                                 registerDate=datetime.now(),
                                 reply=0, topics=0, follower=0, following=0)
@@ -54,7 +53,7 @@ class SignupResource(Resource):
                 'status': 'success',
                 'msg': '注册成功',
                 'data': {
-                    'userId': str(user_model.id),
+                    'userId': str(user_model.userId),
                     'token': jwt_token
                 }
             }
@@ -80,6 +79,9 @@ class LoginResource(Resource):
                 padding.PKCS1v15()
             ).decode('utf-8')                                       # 解密后的字节数据解码为UTF-8字符串
         except Exception as e:
+            key_size = self.private_key.key_size
+            print(f"密文长度: {len(encrypted_password)}")
+            print(f"期望的密文长度（密钥字节长度）: {key_size}")
             return {'status': 'fail', 'msg': f'解密失败：{e}'}, 400
 
         user_model = UsersService().login(account, user_password)
@@ -92,7 +94,7 @@ class LoginResource(Resource):
                 'status': 'success',
                 'msg': '登录成功',
                 'data': {
-                    'userId': str(user_model.id),
+                    'userId': str(user_model.userId),
                     'token': jwt_token
                 }
             }
@@ -171,11 +173,11 @@ class UserPageResource(Resource):
     def get(self, userId:int):
         user_model = UsersService().get_user_by_id(userId)
         if user_model is not None:
-            return user_model.serialize_mode2()
+            return user_model.serialize_mode3()
         else:
             return {'status': 'fail', 'message': '找不到该用户', 'data': None},404
 
 api.add_resource(SignupResource, '/api/user/register')
 api.add_resource(LoginResource, '/api/user/login')
 api.add_resource(SettingResource, '/api/user/setting')
-api.add_resource(UserPageResource, '/api/user/profile/<int:userId>')
+api.add_resource(UserPageResource, '/api/user/<int:userId>')

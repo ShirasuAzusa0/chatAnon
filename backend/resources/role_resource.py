@@ -1,13 +1,17 @@
 from flask import request
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
+from future.backports.datetime import datetime
 from sqlalchemy import VARCHAR
+from werkzeug.datastructures import FileStorage
 
 from resources import api
 
+from commons.RSAkey_load import load_private_key
 from models import RolesModel
 from services.role_service import RolesService
 from commons.token_check import token_required
 from commons.token_decode import token_decode
+import os
 
 class RoleResource(Resource):
     # 获取角色的具体内容
@@ -83,21 +87,53 @@ class SearchRoleResource(Resource):
             }
 
 class PostRoleResource(Resource):
+    # 初始化方法
+    def __init__(self):
+        # 定义一个语法分析器parser，其值为RequestParser函数，用于处理请求参数的输入
+        self.parser = reqparse.RequestParser()
+        # 通过add_argument方法定义需要解析的参数
+        self.parser.add_argument("avatar",  # 参数名称
+                                 type=FileStorage,  # 文件存储类型
+                                 location="files",  # 提取参数的位置，将数据转换成文件存储
+                                 help="Please private avatar file")  # 请求中没有参数则报错的内容
+        # 加载私钥
+        self.private_key = load_private_key()
+
     # 创建新的角色
     @token_required
     def post(self):
-        data = request.json.get('data', None)
-        roleName = data.get('name', None)
-        tags = data.get('tags', None)
-        avatarURL = data.get('avatarURL', None)
+        roleName = request.form.get('roleName', None)
+        description = request.form.get('description', None)
+        tags = request.form.get('tags', None)
         if not tags:
-            tags.append({'tagId': 0, 'tagName': '通用'})
-        description = data.get('description', None)
-        short_info = data.get('short_info', None)
+            tags = list()
+            tags.append({"roleTagId": 0, "roleTagName": "通用"})
+        short_info = "暂无简介"
 
         roleId = RolesService().generate_roleId()
         user_info = token_decode()
         authorId = user_info.get('userId', None)
+        createdAt = datetime.now()
+
+        avatarURL = None
+
+        # 获取文件，通过self.parser.parse_args()解析请求参数并从中获取名为attachment的文件
+        attachment_file = self.parser.parse_args().get("avatar")
+        # 上传内容只允许为图片
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+        if attachment_file:
+            # 匹配文件拓展名
+            file_extension = attachment_file.filename.rsplit('.', 1)[1].lower()
+            # 检查文件拓展名是否为允许的图片格式
+            if file_extension not in allowed_extensions and file_extension is not None:
+                return {'status': 'fail', 'msg': 'Invalid file format'}, 400
+
+            save_path = os.path.join(os.getcwd(), "avatar")
+            # 相对路径，保存在数据库中和供前端调用
+            # avatarURL = "http://120.76.138.103:5001/avatar/" + attachment_file.filename
+            avatarURL = "http://127.0.0.1:5000/avatar/" + attachment_file.filename
+            # 将文件按当前路径保存
+            attachment_file.save(save_path)
 
         new_role = RolesModel(roleId=roleId,
                               roleName=roleName,
@@ -106,7 +142,8 @@ class PostRoleResource(Resource):
                               favoriteCount=0,
                               avatarURL=avatarURL,
                               description=description,
-                              short_info=short_info)
+                              short_info=short_info,
+                              createdAt=createdAt)
 
         new_role = RolesService().save_role(new_role, tags)
 
@@ -114,7 +151,7 @@ class PostRoleResource(Resource):
             return {
                 'status': 'success',
                 'msg': '新角色创建成功',
-                'roleMeta': {
+                'data': {
                     'roleId': new_role.roleId,
                     'roleName': new_role.roleName
                 }
@@ -188,10 +225,10 @@ class UserFavoriteRoleListResource(Resource):
         res = {
             "status": "success",
             "msg": "用户收藏角色列表获取成功",
-            "favorites": []
+            "data": []
         }
         for role in favorite_role_list:
-            res["favorites"].append(role.serialize_mode1())
+            res["data"].append(role.serialize_mode1())
 
         return res
 
@@ -223,10 +260,38 @@ class UserReleasedRoleListResource(Resource):
                 "msg": "获取用户创建过的角色列表失败"
             }, 404
 
+class UserHistoryRoleResource(Resource):
+    # 获取历史的聊天角色列表
+    @token_required
+    def get(self):
+        user_info = token_decode()
+        userId = user_info.get('userId', None)
+        if userId is None:
+            return {
+                'status': 'fail',
+                'msg': '用户获取失败'
+            }, 404
+
+        history_role_list = RolesService().get_history_roles(userId)
+        if history_role_list:
+            res = {
+                "status": "success",
+                "msg": "获取历史的聊天角色列表成功",
+                "data": {"roles": []}
+            }
+            for role in history_role_list:
+                res["data"]["roles"].append(role.serialize_mode1())
+            return res
+        else:
+            return {
+                "status": "fail",
+                "msg": "获取历史的聊天角色列表失败"
+            }, 404
+
 api.add_resource(RoleResource, '/api/role-list/role/<int:roleId>')
 api.add_resource(RecommendRoleListResource, '/api/role-list/recommended')
 api.add_resource(NewestRoleResource, '/api/role-list/newest')
-api.add_resource(PostRoleResource, '/api/role-list/create-role')
+api.add_resource(PostRoleResource, '/api/role-list/new')
 api.add_resource(RoleLikesResource, '/api/role-list/role/<int:roleId>/likes')
 api.add_resource(FavoriteRoleResource, '/api/role-list/role/<int:roleId>/favorite')
 api.add_resource(UserFavoriteRoleListResource, '/api/role-list/favorite')

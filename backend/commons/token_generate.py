@@ -7,4 +7,4 @@ from commons.configs import JWT_SECRET, JWT_ALGORITHM
 def generate_token(user_json):
     expire_time = datetime.datetime.now() + datetime.timedelta(hours=24)
     user_json['exp'] = int(expire_time.timestamp())
-    return jwt.encode(user_json, JWT_SECRET, JWT_ALGORITHM)
+    return jwt.encode(user_json, JWT_SECRET, algorithm=JWT_ALGORITHM)

@@ -49,9 +49,8 @@ class PostListResource(Resource):
         else:
             return {
                 'status': 'success',
-                'data': {
-                    'posts': [post_model.serialize_mode1() for post_model in post_list]
-                }
+                'msg': '帖子列表获取成功',
+                'data': [post_model.serialize_mode1() for post_model in post_list]
             }
 
 class NewPostResource(Resource):
@@ -62,12 +61,13 @@ class NewPostResource(Resource):
         title = data.get('title', None)
         tags = data.get('tags', None)
         if not tags:
+            tags = list()
             tags.append({"tagId": 0, "tagName": "通用"})
         content = data.get('content', None)
 
         postId = PostsService().generate_postId()
         user_info = token_decode()
-        authorId = user_info.get('id', None)
+        authorId = user_info.get('userId', None)
         createdAt = datetime.now()
 
         new_post = PostsModel(postId=postId,

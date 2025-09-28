@@ -1,5 +1,6 @@
 from cryptography.hazmat.primitives import serialization
 from commons.utils import get_key_path
+from commons.configs import SECRET_KEY
 
 # 载入私钥
 def load_private_key():
