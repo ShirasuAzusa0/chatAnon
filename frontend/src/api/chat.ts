@@ -42,7 +42,12 @@ export const sendMessage = async (
   if (attachment) {
     formData.append('attachment', attachment);
   }
-  return await post<ChatMessage>(`/api/chat/${chatId}`, formData);
+  return await post<ChatMessage, FormData>(`/api/chat/${chatId}`, formData);
+};
+
+// 获取AI角色回复的消息,在发送消息后调用
+export const receiveMessageResponse = async (chatId: number, latestMessageId: number) => {
+  return await get<ChatMessage>(`/api/chat/${chatId}/receive`, { latestMessageId });
 };
 
 // 获取某个聊天室的具体聊天记录

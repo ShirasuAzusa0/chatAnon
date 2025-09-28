@@ -36,7 +36,7 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use((config) => {
   const { token } = useUserStore.getState();
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `${token}`;
   }
   return config;
 });
@@ -44,8 +44,7 @@ apiClient.interceptors.request.use((config) => {
 // 响应拦截器：统一错误转换；默认直接返回 data
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // 有data就直接返回data，否则返回整个响应
-    return response.data ? response.data : response;
+    return response.data;
   },
   (error: AxiosError) => {
     const transformed: ApiError = normalizeAxiosError(error);
@@ -75,15 +74,17 @@ function normalizeAxiosError(error: AxiosError): ApiError {
 // 基础请求方法，通过T指定返回数据类型；可通过config改写配置
 export async function request<T>(config: AxiosRequestConfig): Promise<T> {
   const response = await apiClient.request<T>(config);
-  return response.data as T;
+  // 有data就直接返回data，否则返回整个响应
+  return response.data ? (response.data as T) : (response as T);
 }
 
 // 封装HTTP请求方法
 export function get<T>(
   url: string,
-  config?: Omit<AxiosRequestConfig, 'url' | 'method'>
+  params?: Record<string, unknown>,
+  config?: Omit<AxiosRequestConfig, 'url' | 'method' | 'params'>
 ): Promise<T> {
-  return request<T>({ ...config, url, method: 'GET' });
+  return request<T>({ ...config, url, method: 'GET', params });
 }
 
 export function post<T, B = unknown>(
@@ -91,6 +92,19 @@ export function post<T, B = unknown>(
   body?: B,
   config?: Omit<AxiosRequestConfig<B>, 'url' | 'method' | 'data'>
 ): Promise<T> {
+  // 处理 FormData 类型上传
+  if (body instanceof FormData) {
+    const formDataConfig = {
+      ...config,
+      headers: {
+        ...(config?.headers || {}),
+        'Content-Type': undefined, // 让浏览器自动设置正确的 Content-Type
+      },
+    };
+    return request<T>({ ...formDataConfig, url, method: 'POST', data: body });
+  }
+
+  // 普通 JSON 数据上传
   return request<T>({ ...config, url, method: 'POST', data: body });
 }
 

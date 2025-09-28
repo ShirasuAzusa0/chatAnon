@@ -83,12 +83,18 @@ export const fetchRoleListByTag = async (tagName: string) => {
 };
 
 // 用户创建自定义角色
-export const createCustomRole = async (roleName: string, description: string, attachment: File) => {
+export const createCustomRole = async (
+  roleName: string,
+  description: string,
+  tags?: string[],
+  attachment?: File
+) => {
   const formData = new FormData();
   formData.append('roleName', roleName);
   formData.append('description', description);
-  formData.append('attachment', attachment);
-  return await post<RoleData>('api/role-list/new', formData);
+  if (tags) formData.append('tags', JSON.stringify(tags));
+  if (attachment) formData.append('attachment', attachment);
+  return await post<{ roleId: number; roleName: string }, FormData>('/api/role-list/new', formData);
 };
 
 // 获取用户收藏的角色列表

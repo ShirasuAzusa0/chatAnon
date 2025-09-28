@@ -6,8 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useUserStore } from '@/stores/userStore';
 import RoleDetailPanel, { type UserDetail } from '@/components/RoleDetailPanel';
-import { fetchChatMessages, sendMessage, type ChatMessage } from '@/api/chat';
+import {
+  fetchChatMessages,
+  sendMessage,
+  receiveMessageResponse,
+  type ChatMessage,
+} from '@/api/chat';
 import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 type Message = {
   id: string;
@@ -27,6 +34,7 @@ type LoadingState = {
   messages: boolean;
   roleDetail: boolean;
   sending: boolean;
+  waiting: boolean; // 等待对方回复的状态
 };
 
 function ChatPage() {
@@ -40,6 +48,7 @@ function ChatPage() {
     messages: false,
     roleDetail: false,
     sending: false,
+    waiting: false,
   });
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,7 +125,7 @@ function ChatPage() {
 
   const handleSend = async () => {
     const trimmedMsg = inputValue.trim();
-    if (!trimmedMsg || !chatId || loading.sending) return;
+    if (!trimmedMsg || !chatId || loading.sending || loading.waiting) return;
 
     setLoading((prev) => ({ ...prev, sending: true }));
 
@@ -131,6 +140,7 @@ function ChatPage() {
     setInputValue('');
 
     try {
+      // 发送用户消息
       const response = await sendMessage(
         Number(chatId),
         'user',
@@ -151,14 +161,37 @@ function ChatPage() {
             : msg
         )
       );
+
+      // 设置等待对方回复状态
+      setLoading((prev) => ({ ...prev, sending: false, waiting: true }));
+
+      try {
+        // 调用接收消息API
+        const assistantResponse = await receiveMessageResponse(Number(chatId), response.id);
+
+        // 添加对方回复消息
+        const assistantMsg: Message = {
+          id: assistantResponse.id.toString(),
+          senderId: 'assistant',
+          content: assistantResponse.content,
+          createdAt: new Date(assistantResponse.time).getTime(),
+        };
+
+        setMessages((prev) => [...prev, assistantMsg]);
+      } catch (error) {
+        console.error('接收对方回复失败:', error);
+        toast.error('消息接收失败！');
+      } finally {
+        // 无论是否成功接收到回复，都重置等待状态
+        setLoading((prev) => ({ ...prev, waiting: false }));
+      }
     } catch (error) {
       console.error('发送消息失败:', error);
       // 移除临时消息
       setMessages((prev) => prev.filter((msg) => msg.id !== tempMsg.id));
       // 恢复输入内容
       setInputValue(trimmedMsg);
-    } finally {
-      setLoading((prev) => ({ ...prev, sending: false }));
+      setLoading((prev) => ({ ...prev, sending: false, waiting: false }));
     }
   };
 
@@ -196,7 +229,8 @@ function ChatPage() {
           {/* 中部：消息列表 */}
           <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
             {loading.messages ? (
-              <div className="flex justify-center py-8">
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 <div className="text-muted-foreground text-sm">加载聊天记录中...</div>
               </div>
             ) : messages.length === 0 ? (
@@ -231,13 +265,19 @@ function ChatPage() {
           <div className="border-t px-3 py-3">
             <div className="flex items-center gap-2">
               <Input
-                placeholder={`发消息给 ${target.name}...`}
+                placeholder={loading.waiting ? '等待对方回复中...' : `发消息给 ${target.name}...`}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={onKeyDown}
+                disabled={loading.sending || loading.waiting}
               />
-              <Button onClick={handleSend} disabled={!inputValue.trim() || loading.sending}>
-                {loading.sending ? '发送中...' : '发送'}
+              <Button
+                onClick={handleSend}
+                disabled={!inputValue.trim() || loading.sending || loading.waiting}
+              >
+                {loading.sending && <Loader2 className="animate-spin" />}
+                {loading.waiting && <Loader2 className="animate-spin" />}
+                {loading.sending ? '发送中...' : loading.waiting ? '等待回复...' : '发送'}
               </Button>
             </div>
           </div>

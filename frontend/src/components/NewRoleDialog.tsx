@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,12 +12,14 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export interface NewRoleFormData {
   roleName: string;
-  characteristics: string;
-  avatar?: File | null;
+  description: string;
+  attachment?: File | null;
+  tags: string[];
 }
 
 interface NewRoleDialogProps {
@@ -30,21 +32,28 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
   // 表单状态
   const [formData, setFormData] = useState<NewRoleFormData>({
     roleName: '',
-    characteristics: '',
-    avatar: null,
+    description: '',
+    attachment: null,
+    tags: [],
   });
 
   // 表单错误状态
   const [errors, setErrors] = useState({
     roleName: '',
-    characteristics: '',
+    description: '',
   });
+
+  // 标签输入状态
+  const [tagInput, setTagInput] = useState('');
 
   // 表单提交状态
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 处理表单变化
-  const handleInputChange = (field: keyof NewRoleFormData, value: string | File | null) => {
+  const handleInputChange = (
+    field: keyof NewRoleFormData,
+    value: string | File | null | string[]
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -57,6 +66,36 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
         [field]: '',
       }));
     }
+  };
+
+  // 处理标签输入
+  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTagInput(e.target.value);
+  };
+
+  // 添加标签
+  const handleAddTag = () => {
+    const trimmedTag = tagInput.trim();
+    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
+      handleInputChange('tags', [...formData.tags, trimmedTag]);
+      setTagInput('');
+    }
+  };
+
+  // 按下回车添加标签
+  const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
+
+  // 删除标签
+  const handleRemoveTag = (tagToRemove: string) => {
+    handleInputChange(
+      'tags',
+      formData.tags.filter((tag) => tag !== tagToRemove)
+    );
   };
 
   // 验证表单
@@ -75,14 +114,14 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
       valid = false;
     }
 
-    if (!formData.characteristics.trim()) {
-      newErrors.characteristics = '请输入角色特征';
+    if (!formData.description.trim()) {
+      newErrors.description = '请输入角色特征';
       valid = false;
-    } else if (formData.characteristics.trim().length < 10) {
-      newErrors.characteristics = '角色特征至少需要10个字符';
+    } else if (formData.description.trim().length < 10) {
+      newErrors.description = '角色特征至少需要10个字符';
       valid = false;
-    } else if (formData.characteristics.trim().length > 500) {
-      newErrors.characteristics = '角色特征不能超过500个字符';
+    } else if (formData.description.trim().length > 500) {
+      newErrors.description = '角色特征不能超过500个字符';
       valid = false;
     }
 
@@ -104,12 +143,13 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
       // 提交成功后重置表单
       setFormData({
         roleName: '',
-        characteristics: '',
-        avatar: null,
+        description: '',
+        attachment: null,
+        tags: [],
       });
       setErrors({
         roleName: '',
-        characteristics: '',
+        description: '',
       });
       onOpenChange(false);
     } catch (error) {
@@ -127,74 +167,122 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
       if (!newOpen) {
         setFormData({
           roleName: '',
-          characteristics: '',
-          avatar: null,
+          description: '',
+          attachment: null,
+          tags: [],
         });
         setErrors({
           roleName: '',
-          characteristics: '',
+          description: '',
         });
+        setTagInput('');
       }
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>创建新角色</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="role-name">角色名称</Label>
-            <Input
-              id="role-name"
-              type="text"
-              placeholder="请输入角色名称"
-              value={formData.roleName}
-              onChange={(e) => handleInputChange('roleName', e.target.value)}
-              className={cn(errors.roleName && 'border-destructive')}
-              disabled={isSubmitting}
-            />
-            {errors.roleName && <p className="text-destructive text-sm">{errors.roleName}</p>}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 左列 */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="role-name">角色名称</Label>
+              <Input
+                id="role-name"
+                type="text"
+                placeholder="请输入角色名称"
+                value={formData.roleName}
+                onChange={(e) => handleInputChange('roleName', e.target.value)}
+                className={cn(errors.roleName && 'border-destructive')}
+                disabled={isSubmitting}
+              />
+              {errors.roleName && <p className="text-destructive text-sm">{errors.roleName}</p>}
+            </div>
 
-          <div className="space-y-2">
-            <Label>角色图片</Label>
-            <FileUpload
-              maxSize={5}
-              onFileSelect={(file) => handleInputChange('avatar', file)}
-              preview={true}
-              placeholder="选择角色图片或直接拖拽到此处"
-              disabled={isSubmitting}
-            />
-            <p className="text-muted-foreground text-xs">
-              支持 JPG、PNG、GIF 格式，建议尺寸 200x200 像素，文件大小不超过 5MB
-            </p>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="tags">标签</Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="tags"
+                  type="text"
+                  placeholder="输入标签后按回车添加"
+                  value={tagInput}
+                  onChange={handleTagInputChange}
+                  onKeyDown={handleTagKeyDown}
+                  disabled={isSubmitting}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddTag}
+                  disabled={!tagInput.trim() || isSubmitting}
+                >
+                  添加
+                </Button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {formData.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="px-2 py-1">
+                    {tag}
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground ml-1"
+                      onClick={() => handleRemoveTag(tag)}
+                      disabled={isSubmitting}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              <p className="text-muted-foreground text-xs">添加标签以便更好地分类和查找角色</p>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="characteristics">角色特征</Label>
-            <Textarea
-              id="characteristics"
-              placeholder="请详细描述角色的特征、性格、背景等信息..."
-              value={formData.characteristics}
-              onChange={(e) => handleInputChange('characteristics', e.target.value)}
-              className={cn(
-                errors.characteristics && 'border-destructive',
-                'min-h-[120px]',
-                'max-h-[200px]'
-              )}
-              disabled={isSubmitting}
-            />
-            <div className="flex items-center justify-between">
-              {errors.characteristics && (
-                <p className="text-destructive text-sm">{errors.characteristics}</p>
-              )}
-              <p className="text-muted-foreground ml-auto text-sm">
-                {formData.characteristics.length}/500
+            <div className="space-y-2">
+              <Label>角色图片</Label>
+              <FileUpload
+                maxSize={5}
+                onFileSelect={(file) => handleInputChange('attachment', file)}
+                preview={true}
+                placeholder="选择角色图片或直接拖拽到此处"
+                disabled={isSubmitting}
+              />
+              <p className="text-muted-foreground text-xs">
+                支持 JPG、PNG、GIF 格式，建议尺寸 200x200 像素，文件大小不超过 5MB
               </p>
+            </div>
+          </div>
+
+          {/* 右列 */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="description">角色特征</Label>
+              <Textarea
+                id="description"
+                placeholder="请详细描述角色的特征、性格、背景等信息..."
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                className={cn(
+                  errors.description && 'border-destructive',
+                  'min-h-[250px]',
+                  'max-h-[350px]'
+                )}
+                disabled={isSubmitting}
+              />
+              <div className="flex items-center justify-between">
+                {errors.description && (
+                  <p className="text-destructive text-sm">{errors.description}</p>
+                )}
+                <p className="text-muted-foreground ml-auto text-sm">
+                  {formData.description.length}/500
+                </p>
+              </div>
             </div>
           </div>
         </div>
