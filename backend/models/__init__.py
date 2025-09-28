@@ -4,6 +4,7 @@ from models.roleCategories_model import RoleCategoriesModel
 from models.role_category_model import role_category
 from models.role_favorite_model import role_favorites
 from models.role_like_model import role_like
+from models.role_history_model import role_history
 from models.posts_model import PostsModel
 from models.categories_model import CategoriesModel
 from models.post_category_model import post_category

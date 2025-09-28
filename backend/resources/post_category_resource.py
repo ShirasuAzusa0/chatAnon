@@ -26,12 +26,12 @@ class TagsPostsListResource(Resource):
                 "status": "success",
                 "msg": "获取指定标签对应的帖子列表成功",
                 "data": tag_postList.serialize_mode3()
-            }
+            }, 200
         else:
             return {
                 "status": "fail",
                 "msg": "获取指定标签对应的帖子列表失败"
-            }
+            }, 404
 
 
 api.add_resource(TagsResource, '/api/forum/tags')

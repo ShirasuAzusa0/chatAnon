@@ -1,5 +1,7 @@
 from sqlalchemy import VARCHAR, DATETIME, INT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.role_history_model import role_history
 from resources import db
 
 from models.role_like_model import role_like
@@ -13,7 +15,7 @@ class UsersModel(db.Model):
     userId: Mapped[INT] = mapped_column(INT, primary_key=True, nullable=False)
     userName: Mapped[VARCHAR] = mapped_column(VARCHAR(255), nullable=False)
     email: Mapped[VARCHAR] = mapped_column(VARCHAR(255), nullable=False)
-    password: Mapped[VARCHAR] = mapped_column(VARCHAR(255), nullable=False)
+    password: Mapped[VARCHAR] = mapped_column(VARCHAR(1020), nullable=False)
     avatarURL: Mapped[VARCHAR] = mapped_column(VARCHAR(255), nullable=False)
     selfDescription: Mapped[VARCHAR] = mapped_column(VARCHAR(255), nullable=False)
     registerDate: Mapped[DATETIME] = mapped_column(INT, nullable=False)
@@ -27,6 +29,9 @@ class UsersModel(db.Model):
 
     # 定义 roleLiked 成员变量与 RolesModel 映射类的关系（多对多）
     roleLiked = relationship("RolesModel", secondary=role_like, back_populates="userRoleLiked")
+
+    # 定义 roleHistory 成员变量与 RolesModel 映射类的关系（多对多）
+    roleHistory = relationship("RolesModel", secondary=role_history, back_populates="userRoleHistory")
 
     # 定义 postsLiked 成员变量与 PostsModel 映射类的关系（多对多）
     postLiked = relationship("PostsModel", secondary=post_like, back_populates="userPostLiked")
@@ -46,15 +51,17 @@ class UsersModel(db.Model):
     # users 与 comments 反向关系
     comments = relationship("CommentsModel", back_populates="author")
 
+    # user 与 chatrooms 反向关系
+    chatrooms = relationship("chatRoomModel", back_populates="user")
+
     # 序列化方法，需要序列化为json数据后再传输给前端
     def serialize_mode1(self):
         return {
             'userId': self.userId,
             'attributes': {
-                'avatarUrl': str(self.avatarUrl),
+                'avatarURL': str(self.avatarURL),
                 'userName': str(self.userName),
-                'email': str(self.email),
-                'type': str(self.type)
+                'email': str(self.email)
             }
         }
 
@@ -83,10 +90,10 @@ class UsersModel(db.Model):
             'status': 'success',
             'msg': '用户信息更新成功',
             'data': {
+                'userId': self.userId,
                 'userName': str(self.userName),
                 'email': str(self.email),
-                'avatar': str(self.avatarUrl),
-                'selfDescription': str(self.selfDescription),
+                'avatarURL': str(self.avatarURL)
             }
         }
 

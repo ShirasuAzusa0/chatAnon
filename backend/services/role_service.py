@@ -4,6 +4,7 @@ from models.roles_model import RolesModel
 from models.role_category_model import role_category
 from models.role_favorite_model import role_favorites
 from models.role_like_model import role_like
+from models.role_history_model import role_history
 from services.roleCategories_service import RoleCategoriesService
 from resources import db
 
@@ -38,11 +39,11 @@ class RolesService:
         for tag in tags:
             insert_stmt = role_category.insert().values(
                 roleId=new_role.roleId,
-                tagId=tag["tagId"]
+                roleTagId=tag["roleTagId"]
             )
             db.session.execute(insert_stmt)
             db.session.commit()
-            tag_model = RoleCategoriesService().get_tag_by_id(tag["tagId"])
+            tag_model = RoleCategoriesService().get_tag_by_id(tag["roleTagId"])
             tag_model.lastUpdateTime = func.now()
             tag_model.rolesCount += 1
             db.session.commit()
@@ -138,6 +139,15 @@ class RolesService:
     # 通过搜索角色名获取角色列表
     def get_roles_by_search(self, roleName:VARCHAR):
         return RolesModel.query.filter_by(roleName=roleName).all()
+
+    # 获取历史的聊天角色列表
+    def get_history_roles(self, userId:int):
+        query = (
+            db.session.query(RolesModel)
+            .join(role_history, RolesModel.roleId == role_history.c.roleId)
+            .filter(role_history.c.userId == userId)
+        )
+        return db.session.scalars(query).all()
 
     # 获取推荐角色列表
     def get_recommend_roles(self):

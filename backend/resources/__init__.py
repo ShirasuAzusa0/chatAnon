@@ -16,5 +16,6 @@ role_resource,
 role_category_resource,
 post_resource,
 post_category_resource,
-user_resource
+user_resource,
+attachment_resource
 )
