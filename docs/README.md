@@ -13,3 +13,10 @@ ChatAnon 是一个前后端分离的AI角色扮演聊天应用程序，通过调
 - `前端`：TypeScript、React、Tailwind CSS、shadcn/ui、Zustand、React Router
 - `后端`：python3.12、Flask、Flask-RESTful、SQLAlchemy、RSA、JWT、
 - `数据库`：MySQL
+
+## 项目截图
+<img width="1819" height="1210" alt="屏幕截图 2025-09-28 235616" src="https://github.com/user-attachments/assets/669db047-e3c3-42ac-9c97-800d474535d6" />
+
+<img width="1819" height="1210" alt="屏幕截图 2025-09-28 235512" src="https://github.com/user-attachments/assets/55c008f4-191f-4170-a4ab-08e216ee86b3" />
+
+<img width="1819" height="1210" alt="屏幕截图 2025-09-28 235538" src="https://github.com/user-attachments/assets/a4c26662-a058-4f68-acd4-85a686cc792a" />
