@@ -43,3 +43,6 @@ __pycache__/
 __pycache__/
 *.pyc
 *.pyo
+
+# RSA key
+*.pem
