@@ -19,6 +19,8 @@ ChatAnon 是一个前后端分离的匿名聊天应用程序。前端使用 Reac
   - **ORM**: SQLAlchemy
   - **数据库**: MySQL
   - **CORS**: Flask-Cors
+  - **鉴权机制**: JWT token
+  - **加密信息保护**: RSA
 
 ## 3. 模块规格
 
