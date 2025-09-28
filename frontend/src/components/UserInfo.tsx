@@ -55,8 +55,8 @@ export function UserInfo() {
           <AvatarFallback>{user.userName.slice(0, 2)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col overflow-hidden group-data-[state=collapsed]:hidden">
-          <span className="truncate text-sm font-medium">{user.userName}</span>
-          <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+          <span className="w-24 truncate text-sm font-medium">{user.userName}</span>
+          <span className="text-muted-foreground w-24 truncate text-xs">{user.email}</span>
         </div>
       </div>
 
