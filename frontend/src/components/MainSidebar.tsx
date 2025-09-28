@@ -1,6 +1,7 @@
 import { Home, Star, BookUser, ChevronDown, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fetchChatHistoryList, type ChatHistory } from '@/api/chat';
+import { useUserStore } from '@/stores/userStore';
 
 import {
   Sidebar,
@@ -45,6 +46,9 @@ const items = [
 ];
 
 export function MainSidebar() {
+  // 获取用户登录状态
+  const { isLoggedIn } = useUserStore();
+
   // 添加聊天历史状态
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +56,14 @@ export function MainSidebar() {
 
   // 获取聊天历史数据
   useEffect(() => {
+    // 只有在用户已登录时才获取聊天历史
+    if (!isLoggedIn) {
+      setChatHistory([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
     const fetchChatHistory = async () => {
       setIsLoading(true);
       setError(null);
@@ -71,7 +83,7 @@ export function MainSidebar() {
     };
 
     fetchChatHistory();
-  }, []);
+  }, [isLoggedIn]);
   return (
     <Sidebar variant="inset" collapsible="icon">
       {/* 侧边栏顶部 */}
@@ -120,7 +132,11 @@ export function MainSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {isLoading ? (
+                  {!isLoggedIn ? (
+                    <div className="text-muted-foreground py-2 text-center text-sm">
+                      登录以查看聊天历史
+                    </div>
+                  ) : isLoading ? (
                     <div className="flex items-center justify-center py-2">
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       <span>加载中...</span>

@@ -40,6 +40,18 @@ export interface RoleTag {
   tagName: string;
 }
 
+/**
+ * 角色具体信息模型
+ */
+export interface RoleDetailInfo {
+  avatarURL: string;
+  description: string;
+  favoriteCount: number;
+  likesCount: number;
+  roleId: number;
+  roleName: string;
+}
+
 // 获取聊天角色推荐列表
 export const fetchRecommendedRoleList = async () => {
   return await get<RoleData[]>('/api/role-list/recommended');
@@ -56,8 +68,8 @@ export const fetchRoleTags = async () => {
 };
 
 // 获取具体角色内容
-export const fetchRoleDetail = async () => {
-  return await get<RoleData>('/api/role-list/tags');
+export const fetchRoleDetail = async (roleId: number) => {
+  return await get<RoleDetailInfo>(`/api/role-list/role/${roleId}`);
 };
 
 // 获取搜索角色列表
