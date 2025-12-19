@@ -1,7 +1,8 @@
 import { Home, Star, BookUser, ChevronDown, Loader2, MessagesSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { fetchChatHistoryList, type ChatHistory } from '@/api/chat';
+import { fetchChatHistoryList, type ChatSession } from '@/api/chat';
 import { useUserStore } from '@/stores/userStore';
+import dayjs from 'dayjs';
 
 import {
   Sidebar,
@@ -20,6 +21,7 @@ import { Link } from 'react-router';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { UserInfo } from '@/components/UserInfo.tsx';
 import { ModeToggle } from '@/components/ui/mode-toggle';
+import { formatTime } from '@/lib/date';
 
 // Menu items.
 const items = [
@@ -50,7 +52,7 @@ export function MainSidebar() {
   const { isLoggedIn } = useUserStore();
 
   // 添加聊天历史状态
-  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,9 +71,9 @@ export function MainSidebar() {
       setError(null);
       try {
         const data = await fetchChatHistoryList();
-        // 按照lastUpdateTime排序，最新的在最上面
+        // 按照lastUpdatedAt排序，最新的在最上面
         const sortedData = [...data].sort(
-          (a, b) => new Date(b.lastUpdateTime).getTime() - new Date(a.lastUpdateTime).getTime()
+          (a, b) => new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime()
         );
         setChatHistory(sortedData);
       } catch (err) {
@@ -84,6 +86,7 @@ export function MainSidebar() {
 
     fetchChatHistory();
   }, [isLoggedIn]);
+
   return (
     <Sidebar variant="inset" collapsible="icon">
       {/* 侧边栏顶部 */}
@@ -149,12 +152,12 @@ export function MainSidebar() {
                     </div>
                   ) : (
                     chatHistory.map((chatItem) => (
-                      <SidebarMenuItem key={chatItem.chatId}>
+                      <SidebarMenuItem key={chatItem.sessionId}>
                         <SidebarMenuButton asChild>
-                          <Link to={`/chat/${chatItem.chatId}`}>
-                            <span>{chatItem.chatName}</span>
+                          <Link to={`/chat/${chatItem.sessionId}`}>
+                            <span>{chatItem.sessionName}</span>
                             <span className="text-muted-foreground ml-auto text-xs">
-                              {new Date(chatItem.lastUpdateTime).toLocaleDateString()}
+                              {formatTime(dayjs(chatItem.lastUpdatedAt))}
                             </span>
                           </Link>
                         </SidebarMenuButton>

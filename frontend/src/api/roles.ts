@@ -1,43 +1,30 @@
 import { get, post } from '@/lib/apiClient';
+import type { ModelInfo } from '@/types';
 
 export interface RoleData {
-  /**
-   * 概览图
-   */
+  /** 概览图 */
   avatarURL: string;
-  /**
-   * 收藏数
-   */
+  /** 收藏数 */
   favoriteCount: number;
-  /**
-   * 点赞数
-   */
+  /** 点赞数 */
   likesCount: number;
-  /**
-   * 唯一标识符，用于索引、跳转、查询详情
-   */
+  /** 唯一标识符，用于索引、跳转、查询详情 */
   roleId: number;
-  /**
-   * 角色名
-   */
+  /** 角色名 */
   roleName: string;
-  /**
-   * 简介
-   */
-  short_info: string;
+  /** 角色简介 */
+  shortInfo: string;
 }
 
 export interface RoleTag {
-  /**
-   * 标签下的内容数目
-   */
-  Counts: number;
-  /**
-   * 最新更新时间
-   */
+  /** 标签下的内容数目 */
+  counts: number;
+  /** 最新更新时间 */
   lastUpdateTime: string;
   tagId: number;
   tagName: string;
+  /** 标签颜色 */
+  hueColor: number;
 }
 
 /**
@@ -50,6 +37,7 @@ export interface RoleDetailInfo {
   likesCount: number;
   roleId: number;
   roleName: string;
+  model: ModelInfo;
 }
 
 // 获取聊天角色推荐列表
@@ -73,8 +61,8 @@ export const fetchRoleDetail = async (roleId: number) => {
 };
 
 // 获取搜索角色列表
-export const fetchSearchRoleList = async (searchParam: string) => {
-  return await get<RoleData[]>(`/api/role-list/search/${searchParam}`);
+export const fetchSearchRoleList = async (searchParam: string, tag?: string) => {
+  return await get<RoleData[]>(`/api/role-list/search/${searchParam}${tag ? `?tag=${tag}` : ''}`);
 };
 
 // 获取标签下的角色列表
@@ -82,24 +70,28 @@ export const fetchRoleListByTag = async (tagName: string) => {
   return await get<RoleData[]>(`/api/role-list/${tagName}`);
 };
 
+export interface CreateCustomRoleRequest {
+  roleName: string; //用户新建的角色名称
+  description: string; // 用户输入的角色描述，可用于调用模型
+  avatar?: File; // 用户上传的角色头像
+  tags: string[]; // 用户选择角色分类标签
+  userId: number; // 用户ID
+  shortInfo: string; // 用户输入的角色简短介绍
+  prompt: string; // 用户上传的角色详细的提示词
+}
+
 // 用户创建自定义角色
-export const createCustomRole = async (
-  roleName: string,
-  description: string,
-  tags?: string[],
-  attachment?: File
-) => {
+export const createCustomRole = async (createCustomRoleRequest: CreateCustomRoleRequest) => {
   const formData = new FormData();
-  formData.append('roleName', roleName);
-  formData.append('description', description);
-  if (tags) formData.append('tags', JSON.stringify(tags));
-  if (attachment) formData.append('attachment', attachment);
-  return await post<{ roleId: number; roleName: string }, FormData>('/api/role-list/new', formData);
+  Object.entries(createCustomRoleRequest).forEach(([key, value]) => {
+    if (key && value !== undefined) formData.append(key, value);
+  });
+  return await post<RoleDetailInfo, FormData>('/api/role-list/newrole', formData);
 };
 
 // 获取用户收藏的角色列表
-export const fetchFavoriteRoleList = async () => {
-  return await get<RoleData[]>('/api/role-list/favorite');
+export const fetchFavoriteRoleList = async (userId: number) => {
+  return await get<RoleData[]>(`/api/role-list/${userId}/favorite`);
 };
 
 // 获取历史的聊天角色列表

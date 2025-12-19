@@ -52,15 +52,9 @@ function ChatPage() {
     waiting: false,
   });
   const listRef = useRef<HTMLDivElement | null>(null);
-  
+
   // 使用语音识别Hook
-  const { 
-    isRecording, 
-    text, 
-    interimText, 
-    startRecording, 
-    stopRecording 
-  } = useSpeechRecognition();
+  const { isRecording, text, interimText, startRecording, stopRecording } = useSpeechRecognition();
 
   // 根据 chatId 获取聊天对象信息
   const target: ChatTarget = useMemo(() => {
@@ -93,10 +87,15 @@ function ChatPage() {
       try {
         const chatMessages = await fetchChatMessages(Number(chatId));
         const formattedMessages: Message[] = chatMessages.map((msg: ChatMessage) => ({
-          id: msg.id.toString(),
-          senderId: msg.role === 'user' ? (currentUser?.userId ?? 'me') : 'assistant',
+          id: msg.messageId.toString(),
+          senderId:
+            msg.role === 'user'
+              ? currentUser?.userId
+                ? String(currentUser?.userId)
+                : 'me'
+              : 'assistant',
           content: msg.content,
-          createdAt: new Date(msg.time).getTime(),
+          createdAt: new Date(msg.createdAt).getTime(),
         }));
         setMessages(formattedMessages);
       } catch (error) {
@@ -142,7 +141,7 @@ function ChatPage() {
     // 立即显示用户消息
     const tempMsg: Message = {
       id: `temp-${Date.now()}`,
-      senderId: currentUser?.userId ?? 'me',
+      senderId: currentUser?.userId ? String(currentUser.userId) : 'me',
       content: trimmedMsg,
       createdAt: Date.now(),
     };
@@ -163,10 +162,10 @@ function ChatPage() {
         prev.map((msg) =>
           msg.id === tempMsg.id
             ? {
-                id: response.id.toString(),
-                senderId: currentUser?.userId ?? 'me',
+                id: String(response.messageId),
+                senderId: currentUser?.userId ? String(currentUser.userId) : 'me',
                 content: response.content,
-                createdAt: new Date(response.time).getTime(),
+                createdAt: new Date(response.createdAt).getTime(),
               }
             : msg
         )
@@ -177,14 +176,14 @@ function ChatPage() {
 
       try {
         // 调用接收消息API
-        const assistantResponse = await receiveMessageResponse(Number(chatId), response.id);
+        const assistantResponse = await receiveMessageResponse(Number(chatId), response.messageId);
 
         // 添加对方回复消息
         const assistantMsg: Message = {
-          id: assistantResponse.id.toString(),
+          id: String(assistantResponse.messageId),
           senderId: 'assistant',
           content: assistantResponse.content,
-          createdAt: new Date(assistantResponse.time).getTime(),
+          createdAt: new Date(assistantResponse.createdAt).getTime(),
         };
 
         setMessages((prev) => [...prev, assistantMsg]);
@@ -215,18 +214,18 @@ function ChatPage() {
   // 监听语音识别结果，更新输入框
   useEffect(() => {
     if (text) {
-      setInputValue(prev => {
+      setInputValue((prev) => {
         // 移除之前可能存在的中间结果标记
         const baseInput = prev.replace(/\[识别中...\].*$/, '');
         return baseInput + text;
       });
     }
   }, [text]);
-  
+
   // 监听中间结果，更新输入框
   useEffect(() => {
     if (interimText) {
-      setInputValue(prev => {
+      setInputValue((prev) => {
         // 移除之前可能存在的中间结果标记
         const baseInput = prev.replace(/\[识别中...\].*$/, '');
         return baseInput + '[识别中...] ' + interimText;
@@ -314,9 +313,7 @@ function ChatPage() {
               </Button>
               <Button
                 onClick={handleSend}
-                disabled={
-                  !inputValue.trim() || loading.sending || loading.waiting || isRecording
-                }
+                disabled={!inputValue.trim() || loading.sending || loading.waiting || isRecording}
               >
                 {loading.sending && <Loader2 className="animate-spin" />}
                 {loading.waiting && <Loader2 className="animate-spin" />}

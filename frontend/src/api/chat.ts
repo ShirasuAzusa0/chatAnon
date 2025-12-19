@@ -1,30 +1,30 @@
 import { get, post } from '@/lib/apiClient';
 
-export interface ChatHistory {
-  chatId: number; // 聊天室id
-  chatName: string; // 聊天名称
-  lastUpdateTime: string; // 最新更新时间
-}
+// export interface ChatHistory {
+//   chatId: number; // 聊天室id
+//   chatName: string; // 聊天名称
+//   lastUpdateTime: string; // 最新更新时间
+// }
 
 export interface ChatMessage {
-  id: number; // 消息id
-  role: 'system' | 'user' | 'assistant'; // 角色名
-  roleId: number; // 角色id
+  messageId: number; // 消息id
   content: string; // 消息内容
-  time: string; // 消息发送时间
-  attachmentUrl?: number; // 用户上传附件（图片）的url
+  role: 'system' | 'user' | 'assistant'; // 角色名
+  createdAt: string; // 消息发送时间
 }
 
-export interface ChatRoom {
-  chatId: number;
-  chatName: string;
-  lastUpdateTime: string;
-  description: string;
+export interface ChatSession {
+  sessionId: number; // 会话id
+  sessionName: string; // 会话名称
+  roleName: string; // 角色名称
+  modelName: string; // 模型名称
+  createdAt: string; // 会话创建时间
+  lastUpdatedAt: string; // 会话最后使用时间
 }
 
 // 获取侧边栏历史聊天列表
 export const fetchChatHistoryList = async () => {
-  return await get<ChatHistory[]>('/api/chat-history');
+  return await get<ChatSession[]>('/api/chat/session/list');
 };
 
 // 用户发送消息
@@ -50,12 +50,12 @@ export const receiveMessageResponse = async (chatId: number, latestMessageId: nu
   return await get<ChatMessage>(`/api/chat/${chatId}/receive`, { latestMessageId });
 };
 
-// 获取某个聊天室的具体聊天记录
-export const fetchChatMessages = async (chatId: number) => {
-  return await get<ChatMessage[]>(`/api/chat/${chatId}`);
+// 获取当前用户指定会话下的所有消息
+export const fetchChatMessages = async (sessionId: number) => {
+  return await get<ChatMessage[]>(`/api/chat/session/${sessionId}/messages`);
 };
 
-// 查询或新建聊天室
-export const queryRoleChat = async (roleId: number, userId: number) => {
-  return await post<ChatRoom>('/api/chat', { roleId, userId });
+// 创建新的聊天会话
+export const createChatSession = async (userId: number, roleId: number) => {
+  return await post<ChatSession>('/api/chat/session/create', { roleId, userId });
 };

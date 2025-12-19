@@ -26,9 +26,29 @@ function NewRoleCard() {
 
   const handleSubmit = async (data: NewRoleFormData) => {
     try {
+      const userId = useUserStore.getState().user?.userId;
+      if (!userId) {
+        toast.error('用户未登录');
+        return;
+      }
       const result = data.attachment
-        ? await createCustomRole(data.roleName, data.description, data.tags, data.attachment)
-        : await createCustomRole(data.roleName, data.description, data.tags);
+        ? await createCustomRole({
+            roleName: data.roleName,
+            description: data.description,
+            tags: data.tags,
+            avatar: data.attachment,
+            userId,
+            shortInfo: '',
+            prompt: '',
+          })
+        : await createCustomRole({
+            roleName: data.roleName,
+            description: data.description,
+            tags: data.tags,
+            userId,
+            shortInfo: '',
+            prompt: '',
+          });
 
       toast.success(`角色 ${result.roleName} 已成功创建`);
 

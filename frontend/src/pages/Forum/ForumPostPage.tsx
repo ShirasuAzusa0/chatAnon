@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useUserStore } from '@/stores/userStore';
 import CommentPanel from '@/components/forum/CommentPanel';
+import { formatTime } from '@/lib/date';
+import dayjs from 'dayjs';
 
 function ForumPostPage() {
   const { postId } = useParams();
@@ -76,7 +78,7 @@ function ForumPostPage() {
                       <span>{post.author.attributes.userName}</span>
                     </div>
                     <span>·</span>
-                    <span>发布于：{new Date(post.createdAt).toLocaleString()}</span>
+                    <span>发布于：{formatTime(dayjs(post.createdAt), true)}</span>
                     <span>·</span>
                     <span>评论：{post.commentsCount}</span>
                   </div>

@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/userStore';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
 
 function FavoriteRolePage() {
   const [roleList, setRoleList] = useState<RoleData[]>([]);
@@ -12,6 +13,7 @@ function FavoriteRolePage() {
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useUserStore();
   const navigate = useNavigate();
+  const userId = useUserStore.getState().user?.userId;
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -20,7 +22,11 @@ function FavoriteRolePage() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchFavoriteRoleList();
+        if (!userId) {
+          toast.error('用户未登录');
+          return;
+        }
+        const data = await fetchFavoriteRoleList(userId);
         setRoleList(data);
       } catch (err) {
         console.error('获取收藏角色失败:', err);
@@ -31,7 +37,7 @@ function FavoriteRolePage() {
     };
 
     fetchRoles();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, userId]);
 
   return (
     <>
@@ -66,7 +72,7 @@ function FavoriteRolePage() {
               key={role.roleId}
               id={role.roleId}
               name={role.roleName}
-              description={role.short_info}
+              description={role.shortInfo}
               image={role.avatarURL}
               collections={role.favoriteCount}
               likes={role.likesCount}
