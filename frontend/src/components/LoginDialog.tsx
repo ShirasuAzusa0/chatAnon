@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
-import { login, register, fetchUserInfo } from '@/api/user';
+import { login, register, fetchUserInfo, fetchCaptcha } from '@/api/user';
 import { encrypt } from '@/lib/encrypt';
 import { useUserStore } from '@/stores/userStore';
 import { toast } from 'sonner';
@@ -19,10 +19,38 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
   // 使用userStore
   const { login: loginUser } = useUserStore();
 
+  // 验证码状态
+  const [captchaData, setCaptchaData] = useState({
+    key: '',
+    image: '',
+  });
+
+  // 获取验证码
+  const getCaptcha = async () => {
+    try {
+      const res = await fetchCaptcha();
+      if (res) {
+        setCaptchaData({
+          key: res.key,
+          image: res.image,
+        });
+      }
+    } catch (error) {
+      console.error('获取验证码失败:', error);
+      toast.error('获取验证码失败');
+    }
+  };
+
+  // 初始化获取验证码
+  useEffect(() => {
+    getCaptcha();
+  }, []);
+
   // 登录表单状态
   const [loginForm, setLoginForm] = useState({
     email: '',
     password: '',
+    captcha: '',
   });
 
   // 注册表单状态
@@ -31,16 +59,19 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
     userName: '', // 添加用户名字段
     password: '',
     confirmPassword: '',
+    captcha: '',
   });
 
   // 表单错误状态
   const [errors, setErrors] = useState({
     loginEmail: '',
     loginPassword: '',
+    loginCaptcha: '',
     registerEmail: '',
     registerUserName: '',
     registerPassword: '',
     registerConfirm: '',
+    registerCaptcha: '',
   });
 
   // 表单提交状态
@@ -58,16 +89,26 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
   // 处理登录表单变化
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setLoginForm({
-      ...loginForm,
-      [id === 'login-email' ? 'email' : 'password']: value,
-    });
+    let field = '';
+
+    if (id === 'login-email') field = 'email';
+    else if (id === 'login-password') field = 'password';
+    else if (id === 'login-captcha') field = 'captcha';
+
+    if (field) {
+      setLoginForm({
+        ...loginForm,
+        [field]: value,
+      });
+    }
 
     // 清除对应的错误信息
     if (id === 'login-email') {
       setErrors({ ...errors, loginEmail: '' });
     } else if (id === 'login-password') {
       setErrors({ ...errors, loginPassword: '' });
+    } else if (id === 'login-captcha') {
+      setErrors({ ...errors, loginCaptcha: '' });
     }
   };
 
@@ -80,11 +121,14 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
     else if (id === 'register-username') field = 'userName';
     else if (id === 'register-password') field = 'password';
     else if (id === 'register-confirm') field = 'confirmPassword';
+    else if (id === 'register-captcha') field = 'captcha';
 
-    setRegisterForm({
-      ...registerForm,
-      [field]: value,
-    });
+    if (field) {
+      setRegisterForm({
+        ...registerForm,
+        [field]: value,
+      });
+    }
 
     // 清除对应的错误信息
     if (id === 'register-email') {
@@ -95,6 +139,8 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
       setErrors({ ...errors, registerPassword: '' });
     } else if (id === 'register-confirm') {
       setErrors({ ...errors, registerConfirm: '' });
+    } else if (id === 'register-captcha') {
+      setErrors({ ...errors, registerCaptcha: '' });
     }
   };
 
@@ -122,6 +168,11 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
       valid = false;
     }
 
+    if (!loginForm.captcha) {
+      newErrors.loginCaptcha = '请输入验证码';
+      valid = false;
+    }
+
     setErrors(newErrors);
 
     if (valid) {
@@ -135,7 +186,12 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
           return;
         }
         // 调用登录API
-        const response = await login(loginForm.email, encryptedPassword);
+        const response = await login({
+          email: loginForm.email,
+          password: encryptedPassword,
+          captcha: loginForm.captcha,
+          captchaKey: captchaData.key,
+        });
 
         if (response) {
           useUserStore.setState({ token: response.token });
@@ -146,7 +202,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             // 存储用户信息到store
             loginUser(
               {
-                userId: String(userInfo.userId),
+                userId: userInfo.userId,
                 userName: userInfo.userName,
                 email: userInfo.email,
                 avatar: userInfo.avatarUrl || '',
@@ -160,7 +216,8 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
         }
       } catch (error) {
         console.error('登录失败:', error);
-        toast.error('请检查输入的邮箱或密码');
+        toast.error('请检查输入的邮箱、密码或验证码');
+        getCaptcha(); // 失败后刷新验证码
       } finally {
         setIsSubmitting(false);
       }
@@ -201,6 +258,11 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
       valid = false;
     }
 
+    if (!registerForm.captcha) {
+      newErrors.registerCaptcha = '请输入验证码';
+      valid = false;
+    }
+
     setErrors(newErrors);
 
     if (valid) {
@@ -216,11 +278,13 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
         }
 
         // 调用注册API
-        const response = await register(
-          registerForm.userName,
-          registerForm.email,
-          encryptedPassword
-        );
+        const response = await register({
+          userName: registerForm.userName,
+          email: registerForm.email,
+          password: encryptedPassword,
+          captcha: registerForm.captcha,
+          captchaKey: captchaData.key,
+        });
 
         if (response) {
           // 存储token到store
@@ -233,7 +297,7 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             // 存储用户信息到store
             loginUser(
               {
-                userId: String(userInfo.userId),
+                userId: userInfo.userId,
                 userName: userInfo.userName,
                 email: userInfo.email,
                 avatar: userInfo.avatarUrl || '',
@@ -247,7 +311,8 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
         }
       } catch (error) {
         console.error('注册失败:', error);
-        toast.error('注册过程中出现错误，请重试');
+        toast.error('注册过程中出现错误，请检查输入或验证码');
+        getCaptcha(); // 失败后刷新验证码
       } finally {
         setIsSubmitting(false);
       }
@@ -284,6 +349,33 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
             className={cn(errors.loginPassword && 'border-danger')}
           />
           {errors.loginPassword && <p className="text-danger text-sm">{errors.loginPassword}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="login-captcha">验证码</Label>
+          <div className="flex gap-2">
+            <Input
+              id="login-captcha"
+              type="text"
+              placeholder="请输入验证码"
+              value={loginForm.captcha}
+              onChange={handleLoginChange}
+              className={cn(errors.loginCaptcha && 'border-danger', 'flex-1')}
+            />
+            {captchaData.image && (
+              <img
+                src={
+                  captchaData.image.startsWith('data:')
+                    ? captchaData.image
+                    : `data:image/png;base64,${captchaData.image}`
+                }
+                alt="验证码"
+                className="h-10 cursor-pointer rounded border"
+                onClick={getCaptcha}
+                title="点击刷新验证码"
+              />
+            )}
+          </div>
+          {errors.loginCaptcha && <p className="text-danger text-sm">{errors.loginCaptcha}</p>}
         </div>
         <div className="mt-8 flex items-center justify-between">
           <Button className="pl-0" variant="link">
@@ -348,6 +440,35 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
           />
           {errors.registerConfirm && (
             <p className="text-danger text-sm">{errors.registerConfirm}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="register-captcha">验证码</Label>
+          <div className="flex gap-2">
+            <Input
+              id="register-captcha"
+              type="text"
+              placeholder="请输入验证码"
+              value={registerForm.captcha}
+              onChange={handleRegisterChange}
+              className={cn(errors.registerCaptcha && 'border-danger', 'flex-1')}
+            />
+            {captchaData.image && (
+              <img
+                src={
+                  captchaData.image.startsWith('data:')
+                    ? captchaData.image
+                    : `data:image/png;base64,${captchaData.image}`
+                }
+                alt="验证码"
+                className="h-10 cursor-pointer rounded border"
+                onClick={getCaptcha}
+                title="点击刷新验证码"
+              />
+            )}
+          </div>
+          {errors.registerCaptcha && (
+            <p className="text-danger text-sm">{errors.registerCaptcha}</p>
           )}
         </div>
         <div className="mt-8 flex">

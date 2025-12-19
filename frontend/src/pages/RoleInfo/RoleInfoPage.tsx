@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Heart, Star, Share2, AlertCircle } from 'lucide-react';
 import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
-import { queryRoleChat } from '@/api/chat';
+import { createChatSession } from '@/api/chat';
 import { useUserStore } from '@/stores/userStore';
 
 function RoleInfoPage() {
@@ -50,10 +50,10 @@ function RoleInfoPage() {
 
     setIsStartingChat(true);
     try {
-      // 调用 queryRoleChat API
-      const chatRoom = await queryRoleChat(roleData.roleId, parseInt(user.userId));
+      // 调用 createChatSession API
+      const chatSession = await createChatSession(roleData.roleId, user.userId);
       // 跳转到聊天页面/chat/:chatId
-      navigate(`/chat/${chatRoom.chatId}`);
+      navigate(`/chat/${chatSession.sessionId}`);
     } catch (err) {
       console.error('创建聊天失败:', err);
       alert('创建聊天失败，请稍后再试');

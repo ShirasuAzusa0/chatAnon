@@ -4,6 +4,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MessageCircle } from 'lucide-react';
+import { formatTime } from '@/lib/date';
+import dayjs from 'dayjs';
 
 interface CommentItemProps {
   comment: PostComment;
@@ -38,7 +40,7 @@ function CommentItem({
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{comment.author.attributes.userName}</span>
           <span className="text-muted-foreground text-xs">
-            {new Date(comment.createdAt).toLocaleString()}
+            {formatTime(dayjs(comment.createdAt), true)}
           </span>
         </div>
         <p className="break-words whitespace-pre-wrap">{comment.content}</p>

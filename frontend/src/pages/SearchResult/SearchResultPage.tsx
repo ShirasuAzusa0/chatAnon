@@ -49,7 +49,7 @@ export default function SearchResultPage() {
             key={role.roleId}
             id={role.roleId}
             name={role.roleName}
-            description={role.short_info}
+            description={role.shortInfo}
             image={role.avatarURL}
             collections={role.favoriteCount}
             likes={role.likesCount}

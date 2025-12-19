@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router';
+import { formatTime } from '@/lib/date';
+import dayjs from 'dayjs';
 
 const methodOptions = [
   { label: '最新回复', value: 0 as const },
@@ -127,8 +129,8 @@ function ForumPage() {
                 </CardHeader>
                 <CardContent className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 border-t pt-3 text-xs">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span>发布于：{new Date(post.createdAt).toLocaleString()}</span>
-                    <span>最后评论：{new Date(post.lastCommentedAt).toLocaleString()}</span>
+                    <span>发布于：{formatTime(dayjs(post.createdAt), true)}</span>
+                    <span>最后评论：{formatTime(dayjs(post.lastCommentedAt), true)}</span>
                   </div>
                   <div
                     className="flex items-center gap-3"
