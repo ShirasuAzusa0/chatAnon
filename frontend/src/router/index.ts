@@ -3,7 +3,8 @@ import HomePage from '@/pages/Home/HomePage';
 import ChatPage from '@/pages/Chat/ChatPage';
 import RoleInfoPage from '@/pages/RoleInfo/RoleInfoPage';
 import FavoriteRolePage from '@/pages/FavoriteRole/FavoriteRolePage';
-// import ForumPage from '@/pages/Forum/ForumPage';
+import ForumPage from '@/pages/Forum/ForumPage';
+import ForumPostPage from '@/pages/Forum/ForumPostPage';
 import App from '@/App';
 import MyRolePage from '@/pages/MyRole/MyRolePage';
 import SearchResultPage from '@/pages/SearchResult/SearchResultPage';
@@ -28,10 +29,14 @@ const router = createBrowserRouter([
         path: '/favorite-role',
         Component: FavoriteRolePage,
       },
-      // {
-      //   path: '/forum',
-      //   Component: ForumPage,
-      // },
+      {
+        path: '/forum',
+        Component: ForumPage,
+      },
+      {
+        path: '/forum/:postId',
+        Component: ForumPostPage,
+      },
       {
         path: '/my-role',
         Component: MyRolePage,

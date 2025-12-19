@@ -14,7 +14,7 @@ export interface UserInfo {
 
 // 获取公钥
 export const fetchPublicKey = async () => {
-  return await get<{ msg: string; key: string }>('/api/login/publicKey');
+  return await get<{ msg: string; key: string }>('/api/publicKey');
 };
 
 // 登录

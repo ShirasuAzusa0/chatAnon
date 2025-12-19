@@ -1,4 +1,4 @@
-import { Home, Star, BookUser, ChevronDown, Loader2 } from 'lucide-react';
+import { Home, Star, BookUser, ChevronDown, Loader2, MessagesSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fetchChatHistoryList, type ChatHistory } from '@/api/chat';
 import { useUserStore } from '@/stores/userStore';
@@ -28,11 +28,11 @@ const items = [
     url: '/',
     icon: Home,
   },
-  // {
-  //   title: '论坛',
-  //   url: '/forum',
-  //   icon: MessagesSquare,
-  // },
+  {
+    title: '论坛',
+    url: '/forum',
+    icon: MessagesSquare,
+  },
   {
     title: '收藏角色',
     url: '/favorite-role',
