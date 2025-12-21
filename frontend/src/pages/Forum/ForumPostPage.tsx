@@ -97,7 +97,7 @@ function ForumPostPage() {
                     className="mt-1 flex items-center gap-1"
                     onClick={() => {
                       if (numericPostId !== null) {
-                        void toggleLike(numericPostId);
+                        toggleLike(numericPostId);
                       }
                     }}
                     disabled={isLikingId === post.postId}

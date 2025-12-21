@@ -3,10 +3,18 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Heart, Star, Share2, AlertCircle } from 'lucide-react';
+import { Heart, Star, Share2, AlertCircle, ChevronDown } from 'lucide-react';
 import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
-import { createChatSession } from '@/api/chat';
+import { createChatSession, fetchModelList } from '@/api/chat';
 import { useUserStore } from '@/stores/userStore';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import type { ModelInfo } from '@/types';
+import { toast } from 'sonner';
 
 function RoleInfoPage() {
   const { roleId } = useParams();
@@ -18,6 +26,11 @@ function RoleInfoPage() {
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [isStartingChat, setIsStartingChat] = useState<boolean>(false);
+
+  // Model selection state
+  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string>('');
+  const [loadingModels, setLoadingModels] = useState<boolean>(false);
 
   useEffect(() => {
     const loadRoleData = async () => {
@@ -38,29 +51,54 @@ function RoleInfoPage() {
       }
     };
 
+    const loadModels = async () => {
+      setLoadingModels(true);
+      try {
+        const modelList = await fetchModelList();
+        setModels(modelList);
+        if (modelList.length > 0) {
+          setSelectedModel(modelList[0].modelName);
+        }
+      } catch (err) {
+        console.error('加载模型列表失败:', err);
+        toast.error('获取模型列表失败');
+      } finally {
+        setLoadingModels(false);
+      }
+    };
+
     loadRoleData();
-  }, [roleId]);
+    if (isLoggedIn) {
+      loadModels();
+    }
+  }, [roleId, isLoggedIn]);
 
   // 执行开始聊天的核心逻辑
   const executeStartChat = useCallback(async () => {
     if (!roleData || !user) {
-      alert('角色信息加载中，请稍后再试');
+      toast.error('角色信息加载中，请稍后再试');
+      return;
+    }
+
+    if (!selectedModel) {
+      toast.error('请选择对话模型');
       return;
     }
 
     setIsStartingChat(true);
     try {
       // 调用 createChatSession API
-      const chatSession = await createChatSession(roleData.roleId, user.userId);
-      // 跳转到聊天页面/chat/:chatId
-      navigate(`/chat/${chatSession.sessionId}`);
+      // 注意：参数顺序为 userId, roleId, modelName
+      const chatSession = await createChatSession(user.userId, roleData.roleId, selectedModel);
+      // 跳转到聊天页面/chat/:chatId/:roleId
+      navigate(`/chat/${chatSession.sessionId}/${roleData.roleId}`);
     } catch (err) {
       console.error('创建聊天失败:', err);
-      alert('创建聊天失败，请稍后再试');
+      toast.error('创建聊天失败，请稍后再试');
     } finally {
       setIsStartingChat(false);
     }
-  }, [roleData, user, navigate]);
+  }, [roleData, user, navigate, selectedModel]);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -173,7 +211,7 @@ function RoleInfoPage() {
 
             <Separator className="my-6" />
 
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center justify-center gap-4">
               {!isLoggedIn ? (
                 <div className="flex flex-col items-center gap-3">
                   <div className="flex items-center gap-2 text-amber-600">
@@ -185,13 +223,43 @@ function RoleInfoPage() {
                   </Button>
                 </div>
               ) : (
-                <Button
-                  className="w-full md:w-auto"
-                  onClick={handleStartChat}
-                  disabled={isStartingChat}
-                >
-                  {isStartingChat ? '创建聊天中...' : '开始聊天'}
-                </Button>
+                <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between gap-2 sm:w-[200px]"
+                      >
+                        <span>
+                          {selectedModel || (loadingModels ? '加载模型中...' : '选择模型')}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-[200px]">
+                      {models.map((model) => (
+                        <DropdownMenuItem
+                          key={model.modelName}
+                          onClick={() => setSelectedModel(model.modelName)}
+                          className="cursor-pointer"
+                        >
+                          {model.modelName}
+                        </DropdownMenuItem>
+                      ))}
+                      {models.length === 0 && !loadingModels && (
+                        <DropdownMenuItem disabled>暂无可用模型</DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <Button
+                    className="w-full md:w-auto"
+                    onClick={handleStartChat}
+                    disabled={isStartingChat || !selectedModel}
+                  >
+                    {isStartingChat ? '创建聊天中...' : '开始聊天'}
+                  </Button>
+                </div>
               )}
             </div>
           </CardContent>

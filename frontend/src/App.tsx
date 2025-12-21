@@ -4,6 +4,7 @@ import { MainSidebar } from './components/MainSidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { ModeToggle } from '@/components/ui/mode-toggle';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function App() {
   return (
@@ -18,7 +19,9 @@ function App() {
           </div>
 
           <main>
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </main>
           <Toaster position="top-right" richColors />
         </SidebarInset>

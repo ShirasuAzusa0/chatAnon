@@ -12,10 +12,10 @@ import type {
  */
 export const fetchForumPostList = async (
   limit: number,
-  offset: number,
+  start: number,
   method: FetchPostMethod = 0
 ) => {
-  return await get<PostWithLastCommentUser[]>('/api/forum/posts', { limit, offset, method });
+  return await get<PostWithLastCommentUser[]>('/api/forum/posts', { limit, start, method });
 };
 
 /**
@@ -103,7 +103,7 @@ interface LikePostRequest {
 
 export const likePost = async (req: LikePostRequest) => {
   const { type, userId, likeId } = req;
-  return await put<{ isLiked: boolean; likeId: number }>(
+  return await put<{ liked: boolean; likeId: number }>(
     `/api/forum/${type}/like`,
     {},
     { params: { userId, likeId } }

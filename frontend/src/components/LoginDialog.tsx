@@ -10,6 +10,7 @@ import { login, register, fetchUserInfo, fetchCaptcha } from '@/api/user';
 import { encrypt } from '@/lib/encrypt';
 import { useUserStore } from '@/stores/userStore';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 interface TabsDemoProps {
   onTabChange?: (tab: string) => void;
@@ -362,17 +363,23 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
               className={cn(errors.loginCaptcha && 'border-danger', 'flex-1')}
             />
             {captchaData.image && (
-              <img
-                src={
-                  captchaData.image.startsWith('data:')
-                    ? captchaData.image
-                    : `data:image/png;base64,${captchaData.image}`
-                }
-                alt="验证码"
-                className="h-10 cursor-pointer rounded border"
-                onClick={getCaptcha}
-                title="点击刷新验证码"
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <img
+                    src={
+                      captchaData.image.startsWith('data:')
+                        ? captchaData.image
+                        : `data:image/png;base64,${captchaData.image}`
+                    }
+                    alt="验证码"
+                    className="h-9 cursor-pointer rounded-md border"
+                    onClick={getCaptcha}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>点击刷新验证码</p>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
           {errors.loginCaptcha && <p className="text-danger text-sm">{errors.loginCaptcha}</p>}
@@ -454,17 +461,23 @@ function TabsDemo({ onTabChange }: TabsDemoProps) {
               className={cn(errors.registerCaptcha && 'border-danger', 'flex-1')}
             />
             {captchaData.image && (
-              <img
-                src={
-                  captchaData.image.startsWith('data:')
-                    ? captchaData.image
-                    : `data:image/png;base64,${captchaData.image}`
-                }
-                alt="验证码"
-                className="h-10 cursor-pointer rounded border"
-                onClick={getCaptcha}
-                title="点击刷新验证码"
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <img
+                    src={
+                      captchaData.image.startsWith('data:')
+                        ? captchaData.image
+                        : `data:image/png;base64,${captchaData.image}`
+                    }
+                    alt="验证码"
+                    className="h-9 cursor-pointer rounded-md border"
+                    onClick={getCaptcha}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>点击刷新验证码</p>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
           {errors.registerCaptcha && (

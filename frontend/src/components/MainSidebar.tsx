@@ -70,7 +70,15 @@ export function MainSidebar() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchChatHistoryList();
+        // 检查用户是否已登录
+        const userId = useUserStore.getState().user?.userId;
+        if (!userId) {
+          setChatHistory([]);
+          setIsLoading(false);
+          setError('用户未登录');
+          return;
+        }
+        const data = await fetchChatHistoryList(userId);
         // 按照lastUpdatedAt排序，最新的在最上面
         const sortedData = [...data].sort(
           (a, b) => new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime()
@@ -154,7 +162,7 @@ export function MainSidebar() {
                     chatHistory.map((chatItem) => (
                       <SidebarMenuItem key={chatItem.sessionId}>
                         <SidebarMenuButton asChild>
-                          <Link to={`/chat/${chatItem.sessionId}`}>
+                          <Link to={`/chat/${chatItem.sessionId}/${chatItem.roleId}`}>
                             <span>{chatItem.sessionName}</span>
                             <span className="text-muted-foreground ml-auto text-xs">
                               {formatTime(dayjs(chatItem.lastUpdatedAt))}

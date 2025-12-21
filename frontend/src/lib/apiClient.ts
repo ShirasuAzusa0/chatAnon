@@ -123,4 +123,52 @@ export function del<T>(
   return request<T>({ ...config, url, method: 'DELETE' });
 }
 
+// 流式请求方法，使用 fetch 实现
+export async function fetchStream(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const { token } = useUserStore.getState();
+  const headers = new Headers(options.headers);
+
+  if (token) {
+    headers.set('Authorization', `${token}`);
+  }
+  
+  // 如果没有设置 Content-Type 且 body 不是 FormData，默认 json
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+
+  const response = await fetch(fullUrl, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    // 尝试解析错误信息
+    let errorMessage = response.statusText;
+    try {
+      const errorData = await response.json();
+      if (errorData && typeof errorData.message === 'string') {
+        errorMessage = errorData.message;
+      }
+    } catch {
+      // 忽略 JSON 解析错误，使用默认 statusText
+    }
+    
+    // 401 处理
+    if (response.status === 401) {
+      const { logout } = useUserStore.getState();
+      logout();
+    }
+
+    throw new Error(errorMessage || `Request failed with status ${response.status}`);
+  }
+
+  return response;
+}
+
 export { apiClient };

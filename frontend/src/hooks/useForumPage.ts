@@ -133,7 +133,7 @@ export const useForumPage = (): UseForumPageResult => {
             item.postId === postId
               ? {
                   ...item,
-                  likesCount: res.isLiked ? item.likesCount + 1 : item.likesCount - 1,
+                  likesCount: res.liked ? item.likesCount + 1 : item.likesCount - 1,
                 }
               : item
           )
@@ -223,7 +223,7 @@ export const useForumPostPage = (postId: number | null): UseForumPostPageResult 
           prev
             ? {
                 ...prev,
-                likesCount: res.isLiked ? prev.likesCount + 1 : prev.likesCount - 1,
+                likesCount: res.liked ? prev.likesCount + 1 : prev.likesCount - 1,
               }
             : prev
         );

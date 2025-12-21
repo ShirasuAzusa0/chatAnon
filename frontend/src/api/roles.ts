@@ -95,6 +95,6 @@ export const fetchFavoriteRoleList = async (userId: number) => {
 };
 
 // 获取历史的聊天角色列表
-export const fetchHistroyRoleList = async () => {
-  return await get<RoleData[]>('/api/role-list/history');
+export const fetchHistroyRoleList = async (userId: number) => {
+  return await get<RoleData[]>('/api/role-list/history', { userId });
 };
