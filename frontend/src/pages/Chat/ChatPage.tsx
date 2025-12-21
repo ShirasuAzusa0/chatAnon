@@ -8,21 +8,14 @@ import { useUserStore } from '@/stores/userStore';
 import RoleDetailPanel, { type UserDetail } from '@/components/RoleDetailPanel';
 import {
   fetchChatMessages,
-  sendMessage,
-  receiveMessageResponse,
+  sendMessageStream,
   type ChatMessage,
+  type StreamResponse,
 } from '@/api/chat';
 import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
 import { toast } from 'sonner';
 import { Loader2, Mic, MicOff } from 'lucide-react';
 import useSpeechRecognition from '@/hooks/useSpeechRecognition';
-
-type Message = {
-  id: string;
-  senderId: string;
-  content: string;
-  createdAt: number;
-};
 
 type ChatTarget = {
   userId: string;
@@ -39,10 +32,10 @@ type LoadingState = {
 };
 
 function ChatPage() {
-  const { chatId } = useParams();
+  const { chatId, roleId } = useParams();
   const currentUser = useUserStore((s) => s.user);
   const [showDetail, setShowDetail] = useState<boolean>(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [roleDetail, setRoleDetail] = useState<RoleDetailInfo | null>(null);
   const [loading, setLoading] = useState<LoadingState>({
@@ -86,18 +79,7 @@ function ChatPage() {
       setLoading((prev) => ({ ...prev, messages: true }));
       try {
         const chatMessages = await fetchChatMessages(Number(chatId));
-        const formattedMessages: Message[] = chatMessages.map((msg: ChatMessage) => ({
-          id: msg.messageId.toString(),
-          senderId:
-            msg.role === 'user'
-              ? currentUser?.userId
-                ? String(currentUser?.userId)
-                : 'me'
-              : 'assistant',
-          content: msg.content,
-          createdAt: new Date(msg.createdAt).getTime(),
-        }));
-        setMessages(formattedMessages);
+        setMessages(chatMessages);
       } catch (error) {
         console.error('获取聊天记录失败:', error);
       } finally {
@@ -111,11 +93,11 @@ function ChatPage() {
   // 获取角色详情
   useEffect(() => {
     const loadRoleDetail = async () => {
-      if (!chatId) return;
+      if (!roleId) return;
 
       setLoading((prev) => ({ ...prev, roleDetail: true }));
       try {
-        const detail = await fetchRoleDetail(Number(chatId));
+        const detail = await fetchRoleDetail(Number(roleId));
         setRoleDetail(detail);
       } catch (error) {
         console.error('获取角色详情失败:', error);
@@ -125,7 +107,7 @@ function ChatPage() {
     };
 
     loadRoleDetail();
-  }, [chatId]);
+  }, [roleId]);
 
   useEffect(() => {
     if (!listRef.current) return;
@@ -139,67 +121,94 @@ function ChatPage() {
     setLoading((prev) => ({ ...prev, sending: true }));
 
     // 立即显示用户消息
-    const tempMsg: Message = {
-      id: `temp-${Date.now()}`,
-      senderId: currentUser?.userId ? String(currentUser.userId) : 'me',
+    // 使用 Date.now() 作为临时 ID
+    const tempUserMsgId = Date.now();
+    const tempUserMsg: ChatMessage = {
+      messageId: tempUserMsgId,
+      role: 'user',
       content: trimmedMsg,
-      createdAt: Date.now(),
+      createdAt: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, tempMsg]);
+
+    setMessages((prev) => [...prev, tempUserMsg]);
     setInputValue('');
 
     try {
-      // 发送用户消息
-      const response = await sendMessage(
-        Number(chatId),
-        'user',
-        new Date().toISOString(),
-        trimmedMsg
-      );
+      // 发送用户消息并获取流式响应
+      const response = await sendMessageStream(Number(chatId), trimmedMsg);
 
-      // 替换临时消息为真实消息
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === tempMsg.id
-            ? {
-                id: String(response.messageId),
-                senderId: currentUser?.userId ? String(currentUser.userId) : 'me',
-                content: response.content,
-                createdAt: new Date(response.createdAt).getTime(),
-              }
-            : msg
-        )
-      );
+      // 准备接收 AI 回复
+      // 这里的 ID 也是临时的，实际场景中可能需要后端返回 ID 或完全依赖前端 ID
+      const assistantMsgId = tempUserMsgId + 1;
+      const assistantMsg: ChatMessage = {
+        messageId: assistantMsgId,
+        role: 'assistant',
+        content: '',
+        createdAt: new Date().toISOString(),
+      };
 
-      // 设置等待对方回复状态
+      setMessages((prev) => [...prev, assistantMsg]);
       setLoading((prev) => ({ ...prev, sending: false, waiting: true }));
 
-      try {
-        // 调用接收消息API
-        const assistantResponse = await receiveMessageResponse(Number(chatId), response.messageId);
+      // 处理流式响应
+      if (response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = ''; // 用于处理分包/粘包
 
-        // 添加对方回复消息
-        const assistantMsg: Message = {
-          id: String(assistantResponse.messageId),
-          senderId: 'assistant',
-          content: assistantResponse.content,
-          createdAt: new Date(assistantResponse.createdAt).getTime(),
-        };
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        setMessages((prev) => [...prev, assistantMsg]);
-      } catch (error) {
-        console.error('接收对方回复失败:', error);
-        toast.error('消息接收失败！');
-      } finally {
-        // 无论是否成功接收到回复，都重置等待状态
-        setLoading((prev) => ({ ...prev, waiting: false }));
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+
+          // 按行分割处理
+          const lines = buffer.split('\n');
+          // 最后一行可能不完整，留到下一次处理
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || !trimmedLine.startsWith('data:')) continue;
+
+            const data = trimmedLine.slice(5).trim();
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed: StreamResponse = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content;
+
+              if (content) {
+                setMessages((prev) => {
+                  const newMessages = [...prev];
+                  const index = newMessages.findIndex((m) => m.messageId === assistantMsgId);
+                  if (index !== -1) {
+                    newMessages[index] = {
+                      ...newMessages[index],
+                      content: newMessages[index].content + content,
+                    };
+                  }
+                  return newMessages;
+                });
+
+                // 收到第一个有效内容后，就不再是 waiting 状态了
+                setLoading((prev) => ({ ...prev, waiting: false }));
+              }
+            } catch (e) {
+              console.error('解析流式数据失败:', e);
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('发送消息失败:', error);
       // 移除临时消息
-      setMessages((prev) => prev.filter((msg) => msg.id !== tempMsg.id));
+      setMessages((prev) => prev.filter((msg) => msg.messageId !== tempUserMsgId));
       // 恢复输入内容
       setInputValue(trimmedMsg);
+      toast.error('发送失败，请重试');
+    } finally {
       setLoading((prev) => ({ ...prev, sending: false, waiting: false }));
     }
   };
@@ -270,10 +279,10 @@ function ChatPage() {
               </div>
             ) : (
               messages.map((message) => {
-                const isMe = message.senderId === (currentUser?.userId ?? 'me');
+                const isMe = message.role === 'user';
                 return (
                   <div
-                    key={message.id}
+                    key={message.messageId}
                     className={`flex items-end ${isMe ? 'justify-end' : 'justify-start'}`}
                   >
                     <div

@@ -15,12 +15,14 @@ function MyRolePage() {
 
   useEffect(() => {
     if (!isLoggedIn) return;
+    const userId = useUserStore.getState().user?.userId;
+    if (!userId) return;
 
     const fetchRoles = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchHistroyRoleList();
+        const data = await fetchHistroyRoleList(userId);
         setRoleList(data);
       } catch (err) {
         console.error('获取历史角色失败:', err);

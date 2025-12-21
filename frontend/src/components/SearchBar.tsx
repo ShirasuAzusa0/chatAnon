@@ -42,11 +42,6 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
     navigate(`/search/${serachParam}`);
   };
 
-  // 为每个标签生成随机色相并缓存
-  const [tagHues] = useState(() =>
-    Array.from({ length: 8 }, () => Math.floor(Math.random() * 360))
-  );
-
   const handleTagClick = (tag: string) => {
     isSearching = true;
     navigate(`/search/tag/${tag}`);
@@ -123,12 +118,12 @@ function SearchBar({ isSearching = false, param }: SearchBarProps) {
             )}
           >
             <span className="text-sm font-medium text-gray-500">选择角色标签：</span>
-            {tagsList.map((tag, index) => (
+            {tagsList.map((tag) => (
               <Badge
                 key={tag.tagId}
                 style={{
-                  backgroundColor: `oklch(.95 .025 ${tagHues[index]})`,
-                  color: `oklch(.55 .12 ${tagHues[index]})`,
+                  backgroundColor: `oklch(.95 .025 ${tag.hueColor})`,
+                  color: `oklch(.55 .12 ${tag.hueColor})`,
                 }}
                 className="cursor-pointer px-3 py-1 text-sm font-medium transition-all hover:scale-105"
                 onClick={() => handleTagClick(tag.tagName)}

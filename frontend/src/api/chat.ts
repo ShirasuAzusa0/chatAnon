@@ -1,4 +1,5 @@
-import { get, post } from '@/lib/apiClient';
+import { get, post, fetchStream } from '@/lib/apiClient';
+import type { ModelInfo } from '@/types';
 
 // export interface ChatHistory {
 //   chatId: number; // 聊天室id
@@ -13,6 +14,24 @@ export interface ChatMessage {
   createdAt: string; // 消息发送时间
 }
 
+export interface StreamChoice {
+  delta: {
+    content?: string;
+    role?: string;
+  };
+  index: number;
+}
+
+export interface StreamResponse {
+  choices: StreamChoice[];
+  created: number;
+  id: string;
+  model: string;
+  service_tier?: string;
+  object: string;
+  usage?: unknown;
+}
+
 export interface ChatSession {
   sessionId: number; // 会话id
   sessionName: string; // 会话名称
@@ -20,29 +39,20 @@ export interface ChatSession {
   modelName: string; // 模型名称
   createdAt: string; // 会话创建时间
   lastUpdatedAt: string; // 会话最后使用时间
+  roleId: number; // 角色id
 }
 
 // 获取侧边栏历史聊天列表
-export const fetchChatHistoryList = async () => {
-  return await get<ChatSession[]>('/api/chat/session/list');
+export const fetchChatHistoryList = async (userId: number) => {
+  return await get<ChatSession[]>('/api/chat/session/list', { userId });
 };
 
 // 用户发送消息
-export const sendMessage = async (
-  chatId: number,
-  role: 'user',
-  time: string,
-  content: string,
-  attachment?: File
-) => {
-  const formData = new FormData();
-  formData.append('role', role);
-  formData.append('time', time);
-  formData.append('content', content);
-  if (attachment) {
-    formData.append('attachment', attachment);
-  }
-  return await post<ChatMessage, FormData>(`/api/chat/${chatId}`, formData);
+export const sendMessageStream = async (sessionId: number, message: string) => {
+  return await fetchStream('/api/chat/sendMessage/stream', {
+    method: 'POST',
+    body: JSON.stringify({ sessionId, message }),
+  });
 };
 
 // 获取AI角色回复的消息,在发送消息后调用
@@ -56,6 +66,11 @@ export const fetchChatMessages = async (sessionId: number) => {
 };
 
 // 创建新的聊天会话
-export const createChatSession = async (userId: number, roleId: number) => {
-  return await post<ChatSession>('/api/chat/session/create', { roleId, userId });
+export const createChatSession = async (userId: number, roleId: number, modelName: string) => {
+  return await post<ChatSession>('/api/chat/session/create', { roleId, userId, modelName });
+};
+
+// 获取大模型列表
+export const fetchModelList = async () => {
+  return await get<ModelInfo[]>('/api/chat/model/list');
 };
