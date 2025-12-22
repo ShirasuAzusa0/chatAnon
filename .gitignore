@@ -30,5 +30,51 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+# General
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Frontend
+# dependencies
+**/node_modules/
+/frontend/dist/
+
+# Backend
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+/backend-flask/env/
+/backend-flask/venv/
+/backend-flask/ENV/
+/backend-flask/env.bak/
+/backend-flask/venv.bak/
+/backend-flask/instance/
+
+# Flask
+/backend-flask/instance/
+/backend-flask/.webassets-cache
+/backend-flask/htmlcov/
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# env
+#.env
+.env.local
+#.env.production
+
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# RSA key
+*.pem
+
