@@ -1,3 +1,35 @@
+HELP.md
+target/
+resources/key/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
 # General
 .DS_Store
 *.swp
@@ -6,8 +38,7 @@
 
 # Frontend
 # dependencies
-node_modules/
-/frontend/node_modules/
+**/node_modules/
 /frontend/dist/
 
 # Backend
@@ -17,17 +48,17 @@ __pycache__/
 *$py.class
 *.so
 .Python
-/backend/env/
-/backend/venv/
-/backend/ENV/
-/backend/env.bak/
-/backend/venv.bak/
-/backend/instance/
+/backend-flask/env/
+/backend-flask/venv/
+/backend-flask/ENV/
+/backend-flask/env.bak/
+/backend-flask/venv.bak/
+/backend-flask/instance/
 
 # Flask
-/backend/instance/
-/backend/.webassets-cache
-/backend/htmlcov/
+/backend-flask/instance/
+/backend-flask/.webassets-cache
+/backend-flask/htmlcov/
 
 # VS Code
 .vscode/*
@@ -46,3 +77,4 @@ __pycache__/
 
 # RSA key
 *.pem
+
