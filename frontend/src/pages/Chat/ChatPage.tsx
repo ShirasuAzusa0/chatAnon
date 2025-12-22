@@ -15,7 +15,7 @@ import {
 import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
 import { toast } from 'sonner';
 import { Loader2, Mic, MicOff } from 'lucide-react';
-import useSpeechRecognition from '@/hooks/useSpeechRecognition';
+import useXunfeiASR from '@/hooks/useXunfeiASR';
 
 type ChatTarget = {
   userId: string;
@@ -46,8 +46,10 @@ function ChatPage() {
   });
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  // 使用语音识别Hook
-  const { isRecording, text, interimText, startRecording, stopRecording } = useSpeechRecognition();
+  // 使用讯飞实时语音转写 Hook
+  const { isRecording, text, interimText, startRecording, stopRecording } = useXunfeiASR({
+    lang: 'cn', // 中文
+  });
 
   // 根据 chatId 获取聊天对象信息
   const target: ChatTarget = useMemo(() => {
@@ -243,7 +245,7 @@ function ChatPage() {
   }, [interimText]);
 
   return (
-    <div className="flex h-[100dvh] flex-col md:h-[calc(100dvh-20px)]">
+    <div className="flex h-dvh flex-col md:h-[calc(100dvh-20px)]">
       {/* 顶部：聊天对象信息 */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
@@ -314,7 +316,7 @@ function ChatPage() {
               <Button
                 variant="outline"
                 size="icon"
-                className="flex-shrink-0"
+                className="shrink-0"
                 onClick={isRecording ? stopRecording : () => startRecording(true)}
                 disabled={loading.sending || loading.waiting}
               >
@@ -334,7 +336,7 @@ function ChatPage() {
 
         {/* 右侧：用户详情面板 */}
         {showDetail && (
-          <div className="w-full max-w-[360px] border-l">
+          <div className="w-full max-w-90 border-l">
             {loading.roleDetail ? (
               <div className="flex h-full items-center justify-center">
                 <div className="text-muted-foreground text-sm">加载角色详情中...</div>
