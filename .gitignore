@@ -1,14 +1,18 @@
-# General
-.DS_Store
-*.swp
-*.swo
-*~
+HELP.md
+target/
+resources/key/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# Frontend
-# dependencies
-node_modules/
-/frontend/node_modules/
-/frontend/dist/
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
 # Backend
 # Python
@@ -49,3 +53,21 @@ __pycache__/
 
 # node modules
 **/node_modules/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+
