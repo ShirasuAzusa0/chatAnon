@@ -17,17 +17,17 @@ __pycache__/
 *$py.class
 *.so
 .Python
-/backend/env/
-/backend/venv/
-/backend/ENV/
-/backend/env.bak/
-/backend/venv.bak/
-/backend/instance/
+/backend_v1/env/
+/backend_v1/venv/
+/backend_v1/ENV/
+/backend_v1/env.bak/
+/backend_v1/venv.bak/
+/backend_v1/instance/
 
 # Flask
-/backend/instance/
-/backend/.webassets-cache
-/backend/htmlcov/
+/backend_v1/instance/
+/backend_v1/.webassets-cache
+/backend_v1/htmlcov/
 
 # VS Code
 .vscode/*
@@ -46,3 +46,6 @@ __pycache__/
 
 # RSA key
 *.pem
+
+# node modules
+**/node_modules/
