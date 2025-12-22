@@ -1,0 +1,12 @@
+# 环境变量文件
+.env
+.env.local
+.env.production
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 密钥
+*.pem
