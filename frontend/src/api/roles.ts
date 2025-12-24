@@ -73,7 +73,7 @@ export const fetchRoleListByTag = async (tagName: string) => {
 export interface CreateCustomRoleRequest {
   roleName: string; //用户新建的角色名称
   description: string; // 用户输入的角色描述，可用于调用模型
-  avatar?: File; // 用户上传的角色头像
+  avatar?: File | null; // 用户上传的角色头像
   tags: string[]; // 用户选择角色分类标签
   userId: number; // 用户ID
   shortInfo: string; // 用户输入的角色简短介绍

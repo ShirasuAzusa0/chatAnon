@@ -16,6 +16,7 @@ import { fetchRoleDetail, type RoleDetailInfo } from '@/api/roles';
 import { toast } from 'sonner';
 import { Loader2, Mic, MicOff } from 'lucide-react';
 import useXunfeiASR from '@/hooks/useXunfeiASR';
+import { live2DMapData } from './live2dmap.data';
 
 type ChatTarget = {
   userId: string;
@@ -38,6 +39,8 @@ function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [roleDetail, setRoleDetail] = useState<RoleDetailInfo | null>(null);
+  const [motion, setMotion] = useState<string | undefined>();
+  const [speaking, setSpeaking] = useState<boolean>(false);
   const [loading, setLoading] = useState<LoadingState>({
     messages: false,
     roleDetail: false,
@@ -175,27 +178,46 @@ function ChatPage() {
             if (!trimmedLine || !trimmedLine.startsWith('data:')) continue;
 
             const data = trimmedLine.slice(5).trim();
-            if (data === '[DONE]') continue;
+            if (data === '[DONE]') {
+              console.log('Stream ended');
+              setSpeaking(false);
+              console.log('Speaking ended');
+              continue;
+            }
 
             try {
               const parsed: StreamResponse = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content;
 
-              if (content) {
-                setMessages((prev) => {
-                  const newMessages = [...prev];
-                  const index = newMessages.findIndex((m) => m.messageId === assistantMsgId);
-                  if (index !== -1) {
-                    newMessages[index] = {
-                      ...newMessages[index],
-                      content: newMessages[index].content + content,
-                    };
+              // Check if it's an emotion response
+              if ('emotion' in parsed && parsed.emotion) {
+                console.log('Received emotion command:', parsed.emotion);
+                setMotion(parsed.emotion);
+              }
+
+              // Check if it's a content response
+              if ('choices' in parsed) {
+                const content = parsed.choices?.[0]?.delta?.content;
+
+                if (content) {
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const index = newMessages.findIndex((m) => m.messageId === assistantMsgId);
+                    if (index !== -1) {
+                      newMessages[index] = {
+                        ...newMessages[index],
+                        content: newMessages[index].content + content,
+                      };
+                    }
+                    return newMessages;
+                  });
+
+                  // 收到第一个有效内容后，就不再是 waiting 状态了
+                  setLoading((prev) => ({ ...prev, waiting: false }));
+
+                  if (!speaking) {
+                    setSpeaking(true);
                   }
-                  return newMessages;
-                });
-
-                // 收到第一个有效内容后，就不再是 waiting 状态了
-                setLoading((prev) => ({ ...prev, waiting: false }));
+                }
               }
             } catch (e) {
               console.error('解析流式数据失败:', e);
@@ -342,7 +364,12 @@ function ChatPage() {
                 <div className="text-muted-foreground text-sm">加载角色详情中...</div>
               </div>
             ) : (
-              <RoleDetailPanel user={targetDetail} />
+              <RoleDetailPanel
+                user={targetDetail}
+                modelUrl={roleId ? live2DMapData[Number(roleId)] : undefined}
+                motion={motion}
+                speaking={speaking}
+              />
             )}
           </div>
         )}

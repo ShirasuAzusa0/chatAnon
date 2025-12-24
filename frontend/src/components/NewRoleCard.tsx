@@ -31,24 +31,15 @@ function NewRoleCard() {
         toast.error('用户未登录');
         return;
       }
-      const result = data.attachment
-        ? await createCustomRole({
-            roleName: data.roleName,
-            description: data.description,
-            tags: data.tags,
-            avatar: data.attachment,
-            userId,
-            shortInfo: '',
-            prompt: '',
-          })
-        : await createCustomRole({
-            roleName: data.roleName,
-            description: data.description,
-            tags: data.tags,
-            userId,
-            shortInfo: '',
-            prompt: '',
-          });
+      const result = await createCustomRole({
+        roleName: data.roleName,
+        description: data.description,
+        tags: data.tags,
+        avatar: data.attachment ?? null,
+        userId,
+        shortInfo: data.shortInfo,
+        prompt: data.prompt,
+      });
 
       toast.success(`角色 ${result.roleName} 已成功创建`);
 

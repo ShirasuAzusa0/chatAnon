@@ -20,6 +20,8 @@ export interface NewRoleFormData {
   description: string;
   attachment?: File | null;
   tags: string[];
+  shortInfo: string;
+  prompt: string;
 }
 
 interface NewRoleDialogProps {
@@ -35,12 +37,17 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
     description: '',
     attachment: null,
     tags: [],
+    shortInfo: '',
+    prompt: '',
   });
 
   // 表单错误状态
   const [errors, setErrors] = useState({
     roleName: '',
     description: '',
+    shortInfo: '',
+    prompt: '',
+    tags: '',
   });
 
   // 标签输入状态
@@ -60,10 +67,11 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
     }));
 
     // 清除对应的错误信息
-    if (errors[field as keyof typeof errors]) {
+    const errorKey = field as keyof typeof errors;
+    if (errors[errorKey]) {
       setErrors((prev) => ({
         ...prev,
-        [field]: '',
+        [errorKey]: '',
       }));
     }
   };
@@ -125,6 +133,30 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
       valid = false;
     }
 
+    // shortInfo 必填，长度限制
+    if (!formData.shortInfo.trim()) {
+      newErrors.shortInfo = '请输入角色简介';
+      valid = false;
+    } else if (formData.shortInfo.trim().length > 120) {
+      newErrors.shortInfo = '角色简介不能超过120个字符';
+      valid = false;
+    }
+
+    // prompt 必填，最小长度
+    if (!formData.prompt.trim()) {
+      newErrors.prompt = '请输入系统提示词';
+      valid = false;
+    } else if (formData.prompt.trim().length < 10) {
+      newErrors.prompt = '系统提示词至少需要10个字符';
+      valid = false;
+    }
+
+    // tags 必填，至少一个标签
+    if (!formData.tags || formData.tags.length === 0) {
+      newErrors.tags = '请至少添加一个标签';
+      valid = false;
+    }
+
     setErrors(newErrors);
     return valid;
   };
@@ -146,10 +178,15 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
         description: '',
         attachment: null,
         tags: [],
+        shortInfo: '',
+        prompt: '',
       });
       setErrors({
         roleName: '',
         description: '',
+        shortInfo: '',
+        prompt: '',
+        tags: '',
       });
       onOpenChange(false);
     } catch (error) {
@@ -170,10 +207,15 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
           description: '',
           attachment: null,
           tags: [],
+          shortInfo: '',
+          prompt: '',
         });
         setErrors({
           roleName: '',
           description: '',
+          shortInfo: '',
+          prompt: '',
+          tags: '',
         });
         setTagInput('');
       }
@@ -182,12 +224,12 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-200">
         <DialogHeader>
           <DialogTitle>创建新角色</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* 左列 */}
           <div className="space-y-6">
             <div className="space-y-2">
@@ -214,6 +256,7 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
                   value={tagInput}
                   onChange={handleTagInputChange}
                   onKeyDown={handleTagKeyDown}
+                  className={cn(errors.tags && 'border-destructive')}
                   disabled={isSubmitting}
                 />
                 <Button
@@ -226,6 +269,7 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
                   添加
                 </Button>
               </div>
+              {errors.tags && <p className="text-destructive mt-1 text-sm">{errors.tags}</p>}
               <div className="mt-2 flex flex-wrap gap-2">
                 {formData.tags.map((tag) => (
                   <Badge key={tag} variant="secondary" className="px-2 py-1">
@@ -262,17 +306,44 @@ export default function NewRoleDialog({ open, onOpenChange, onSubmit }: NewRoleD
           {/* 右列 */}
           <div className="space-y-6">
             <div className="space-y-2">
+              <Label htmlFor="short-info">角色简介</Label>
+              <Input
+                id="short-info"
+                type="text"
+                placeholder="请输入角色的简短介绍"
+                value={formData.shortInfo}
+                onChange={(e) => handleInputChange('shortInfo', e.target.value)}
+                className={cn(errors.shortInfo && 'border-destructive')}
+                disabled={isSubmitting}
+              />
+              {errors.shortInfo && <p className="text-destructive text-sm">{errors.shortInfo}</p>}
+              <p className="text-muted-foreground text-xs">简短的角色介绍，便于快速了解</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="prompt">系统提示词</Label>
+              <Textarea
+                id="prompt"
+                placeholder="请输入系统提示词，用于指导 AI 角色的行为和回复风格..."
+                value={formData.prompt}
+                onChange={(e) => handleInputChange('prompt', e.target.value)}
+                className={cn('max-h-50 min-h-32', errors.prompt && 'border-destructive')}
+                disabled={isSubmitting}
+              />
+              {errors.prompt && <p className="text-destructive text-sm">{errors.prompt}</p>}
+              <p className="text-muted-foreground text-xs">
+                系统提示词将影响 AI 角色的对话风格和行为表现
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="description">角色特征</Label>
               <Textarea
                 id="description"
                 placeholder="请详细描述角色的特征、性格、背景等信息..."
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className={cn(
-                  errors.description && 'border-destructive',
-                  'min-h-[250px]',
-                  'max-h-[350px]'
-                )}
+                className={cn(errors.description && 'border-destructive', 'min-h-32', 'max-h-50')}
                 disabled={isSubmitting}
               />
               <div className="flex items-center justify-between">

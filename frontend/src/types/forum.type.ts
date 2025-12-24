@@ -46,6 +46,7 @@ export interface Post {
   likesCount: number;
   content: string;
   comments: PostComment[];
+  liked: boolean;
 }
 
 export interface PostWithLastCommentUser extends Post {

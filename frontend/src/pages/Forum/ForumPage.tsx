@@ -94,7 +94,7 @@ function ForumPage() {
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         {posts.length === 0 && !isLoading ? (
-          <div className="text-muted-foreground flex min-h-[200px] flex-col items-center justify-center text-center text-sm">
+          <div className="text-muted-foreground flex min-h-50 flex-col items-center justify-center text-center text-sm">
             <p>暂无帖子</p>
             <p>快去成为第一个发帖的人吧～</p>
           </div>

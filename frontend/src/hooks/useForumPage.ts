@@ -132,9 +132,9 @@ export const useForumPage = (): UseForumPageResult => {
           prev.map((item) =>
             item.postId === postId
               ? {
-                  ...item,
-                  likesCount: res.liked ? item.likesCount + 1 : item.likesCount - 1,
-                }
+                ...item,
+                likesCount: res.liked ? item.likesCount + 1 : item.likesCount - 1,
+              }
               : item
           )
         );
@@ -222,9 +222,10 @@ export const useForumPostPage = (postId: number | null): UseForumPostPageResult 
         setPost((prev) =>
           prev
             ? {
-                ...prev,
-                likesCount: res.liked ? prev.likesCount + 1 : prev.likesCount - 1,
-              }
+              ...prev,
+              liked: res.liked,
+              likesCount: res.liked ? prev.likesCount + 1 : prev.likesCount - 1,
+            }
             : prev
         );
       } catch (err) {
@@ -274,10 +275,10 @@ export const useForumPostPage = (postId: number | null): UseForumPostPageResult 
         setPost((prev) =>
           prev
             ? {
-                ...prev,
-                comments: [...prev.comments, newComment],
-                commentsCount: prev.commentsCount + 1,
-              }
+              ...prev,
+              comments: [...prev.comments, newComment],
+              commentsCount: prev.commentsCount + 1,
+            }
             : prev
         );
       } catch (err) {

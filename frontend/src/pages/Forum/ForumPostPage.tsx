@@ -53,11 +53,11 @@ function ForumPostPage() {
       </header>
 
       {isLoading && !post ? (
-        <div className="text-muted-foreground flex min-h-[200px] flex-col items-center justify-center text-sm">
+        <div className="text-muted-foreground flex min-h-50 flex-col items-center justify-center text-sm">
           正在加载帖子内容...
         </div>
       ) : !post ? (
-        <div className="text-muted-foreground flex min-h-[200px] flex-col items-center justify-center text-sm">
+        <div className="text-muted-foreground flex min-h-50 flex-col items-center justify-center text-sm">
           未找到帖子内容
         </div>
       ) : (
@@ -92,7 +92,7 @@ function ForumPostPage() {
                     ))}
                   </div>
                   <Button
-                    variant="outline"
+                    variant={post.liked ? 'default' : 'outline'}
                     size="sm"
                     className="mt-1 flex items-center gap-1"
                     onClick={() => {
@@ -111,7 +111,7 @@ function ForumPostPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4 border-t pt-4 text-sm leading-relaxed">
-              <p className="break-words whitespace-pre-wrap">{post.content}</p>
+              <p className="wrap-break-word whitespace-pre-wrap">{post.content}</p>
             </CardContent>
           </Card>
 

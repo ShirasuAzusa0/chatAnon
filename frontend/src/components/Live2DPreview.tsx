@@ -11,7 +11,6 @@ interface Live2DPreviewProps {
   width?: number;
   height?: number;
   scale?: number;
-  fallbackImageUrl: string;
   className?: string;
   /** Expression name to display (e.g., 'smile01', 'angry01', 'sad01', 'default') */
   expression?: string;
@@ -19,6 +18,8 @@ interface Live2DPreviewProps {
   motion?: string;
   /** Whether the model is speaking (animates mouth) */
   speaking?: boolean;
+  /** Whether to enable face tracking (eyes following cursor). Default: false */
+  autoInteract?: boolean;
 }
 
 function Live2DPreview({
@@ -26,11 +27,11 @@ function Live2DPreview({
   width = 400,
   height = 600,
   scale = 0.25,
-  fallbackImageUrl,
   className,
   expression,
   motion,
   speaking = false,
+  autoInteract = false,
 }: Live2DPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -69,7 +70,7 @@ function Live2DPreview({
 
         // Load the Live2D model
         const model = await Live2DModel.from(modelUrl, {
-          autoInteract: true,
+          autoInteract, // Enable/disable face tracking (eyes following cursor)
           autoUpdate: true,
         });
 
@@ -117,7 +118,7 @@ function Live2DPreview({
         appRef.current = null;
       }
     };
-  }, [modelUrl, width, height, scale]);
+  }, [modelUrl, width, height, scale, autoInteract]);
 
   // Handle expression changes
   useEffect(() => {
@@ -233,7 +234,9 @@ function Live2DPreview({
         </div>
       )}
       {error && (
-        <img src={fallbackImageUrl} className="h-full w-full object-cover" loading="lazy" />
+        <div className="text-destructive absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">
+          加载 Live2D 模型失败: {error}
+        </div>
       )}
     </div>
   );

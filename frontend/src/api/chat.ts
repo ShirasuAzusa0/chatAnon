@@ -22,7 +22,7 @@ export interface StreamChoice {
   index: number;
 }
 
-export interface StreamResponse {
+export type StreamResponse = {
   choices: StreamChoice[];
   created: number;
   id: string;
@@ -30,7 +30,7 @@ export interface StreamResponse {
   service_tier?: string;
   object: string;
   usage?: unknown;
-}
+} | { emotion: string }
 
 export interface ChatSession {
   sessionId: number; // 会话id
